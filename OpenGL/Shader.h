@@ -9,8 +9,8 @@
 //#include <GL/glew.h>
 
 /*CLASS SOURCE: http://www.learnopengl.com/code_viewer.php?type=header&code=shader
-  AUTHOR:  Joey de Vries http://www.learnopengl.com/#!About
-  LICENSE: https://creativecommons.org/publicdomain/zero/1.0/
+AUTHOR:  Joey de Vries http://www.learnopengl.com/#!About
+LICENSE: https://creativecommons.org/publicdomain/zero/1.0/
 */
 class Shader
 {
@@ -31,7 +31,17 @@ public:
 		{
 			// Open files
 			vShaderFile.open(vertexPath);
+			if (!vShaderFile.good())
+			{
+				std::cout << "ERROR::SHADER::COULD NOT OPEN VERTEX SHADER FILE AT PATH '" << vertexPath << "'" << std::endl;
+			}
+
 			fShaderFile.open(fragmentPath);
+			if (!fShaderFile.good())
+			{
+				std::cout << "ERROR::SHADER::COULD NOT OPEN FRAGMENT SHADER FILE AT PATH '" << fragmentPath << "'" << std::endl;
+			}
+
 			std::stringstream vShaderStream, fShaderStream;
 			// Read file's buffer contents into streams
 			vShaderStream << vShaderFile.rdbuf();
@@ -41,7 +51,9 @@ public:
 			fShaderFile.close();
 			// Convert stream into string
 			vertexCode = vShaderStream.str();
+			//std::cout << "vertexCode: " << vertexCode << std::endl << std::endl;
 			fragmentCode = fShaderStream.str();
+			//std::cout << "fragmentCode: " << fragmentCode << std::endl;
 		}
 		catch (std::ifstream::failure e)
 		{
