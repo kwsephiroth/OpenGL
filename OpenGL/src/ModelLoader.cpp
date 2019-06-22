@@ -18,7 +18,9 @@ void ModelLoader::SplitLineByDelimeter(const std::string & line, char delimiter,
 		if(i < line.size())
 			segment += line[i];
 	}
-	//std::cout << std::endl;
+
+	segments.push(segment);
+	//std::cout << "Segment [" << j << "] : " << segment << std::endl << std::endl;
 }
 
 Tag ModelLoader::GetTag(const std::string & tagString)
@@ -37,8 +39,111 @@ Tag ModelLoader::GetTag(const std::string & tagString)
 		return Tag::None;
 }
 
+void ModelLoader::StoreVertex(std::queue<std::string>& vertexStrings, Model & destinationModel)
+{
+	if (vertexStrings.empty())
+		return;
+
+	if (vertexStrings.size() != 3)
+	{
+		std::cout << "ERROR: Failed to store model vertex : Exactly three components expected." << std::endl;
+		return;
+	}
+
+	try
+	{
+		auto x = std::stof(vertexStrings.front());
+		vertexStrings.pop();
+		
+		auto y = std::stof(vertexStrings.front());
+		vertexStrings.pop();
+
+		auto z = std::stof(vertexStrings.front());
+		vertexStrings.pop();
+
+		destinationModel.m_vertices.emplace_back( x, y, z );
+		
+		//TODO: write ostream overload for easy debugging
+		//std::cout << "VERTICES:" << std::endl;
+		//const auto& vertex = destinationModel.m_vertices.back();
+		//std::cout << "(" << vertex.x << ", " << vertex.y << ", " << vertex.z << ")" << std::endl;
+	}
+	catch (std::exception e)
+	{
+		std::cout << "ERROR: Failed to store model vertex : " << e.what() << std::endl;
+	}
+}
+
+void ModelLoader::StoreTextureCoordinate(std::queue<std::string>& textureCoordinateStrings, Model & destinationModel)
+{
+	if (textureCoordinateStrings.empty())
+		return;
+
+	if (textureCoordinateStrings.size() != 2)
+	{
+		std::cout << "ERROR: Failed to store model texture coordinate: Exactly two components expected." << std::endl;
+		return;
+	}
+
+	try
+	{
+		auto s = std::stof(textureCoordinateStrings.front());
+		textureCoordinateStrings.pop();
+
+		auto t = std::stof(textureCoordinateStrings.front());
+		textureCoordinateStrings.pop();
+
+		destinationModel.m_textureCoordinates.emplace_back(s, t);
+
+		//TODO: write ostream overload for easy debugging
+		//std::cout << "TEXTURE COORDINATES:" << std::endl;
+		//const auto& vertex = destinationModel.m_textureCoordinates.back();
+		//std::cout << "(" << vertex.s << ", " << vertex.t << ")" << std::endl;
+	}
+	catch (std::exception e)
+	{
+		std::cout << "ERROR: Failed to store model texture coordinate: " << e.what() << std::endl;
+	}
+}
+
+void ModelLoader::StoreVertexNormal(std::queue<std::string>& vertexNormalStrings, Model & destinationModel)
+{
+	if (vertexNormalStrings.empty())
+		return;
+
+	if (vertexNormalStrings.size() != 3)
+	{
+		std::cout << "ERROR: Failed to store model vertex normal: Exactly three components expected." << std::endl;
+		return;
+	}
+
+	try
+	{
+		auto x = std::stof(vertexNormalStrings.front());
+		vertexNormalStrings.pop();
+
+		auto y = std::stof(vertexNormalStrings.front());
+		vertexNormalStrings.pop();
+
+		auto z = std::stof(vertexNormalStrings.front());
+		vertexNormalStrings.pop();
+
+		destinationModel.m_normals.emplace_back(x, y, z);
+
+		//TODO: write ostream overload for easy debugging
+		//std::cout << "NORMALS:" << std::endl;
+		//const auto& vertex = destinationModel.m_normals.back();
+		//std::cout << "(" << vertex.x << ", " << vertex.y << ", " << vertex.z << ")" << std::endl;
+	}
+	catch (std::exception e)
+	{
+		std::cout << "ERROR: Failed to store model vertex normal: " << e.what() << std::endl;
+	}
+}
+
 Model ModelLoader::LoadModelFromOBJFile(const char * modelFilePath)
 {
+	std::cout << "Loading model at path '" << modelFilePath << "' ..." << std::endl;
 	Model loadedModel;
 	std::ifstream modelFileStream(modelFilePath, std::ios::in);
 
@@ -65,19 +170,22 @@ Model ModelLoader::LoadModelFromOBJFile(const char * modelFilePath)
 			{
 				case Tag::Vertex:
 				{
-
+					//std::cout << "Component Count = " << lineSegments.size() << std::endl;
+					StoreVertex(lineSegments, loadedModel);
 				}
 				break;
 
 				case Tag::TextureCoordinate:
 				{
-
+					//std::cout << "Component Count = " << lineSegments.size() << std::endl;
+					StoreTextureCoordinate(lineSegments, loadedModel);
 				}
 				break;
 
 				case Tag::VertexNormal:
 				{
-
+					//std::cout << "Component Count = " << lineSegments.size() << std::endl;
+					StoreVertexNormal(lineSegments, loadedModel);
 				}
 				break;
 

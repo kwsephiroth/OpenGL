@@ -17,19 +17,19 @@ class Model
 {
 private:
 	
-	/*std::vector<glm::vec3> m_vertices;
+	std::vector<glm::vec3> m_vertices;
 	std::vector<glm::vec2> m_textureCoordinates;
 	std::vector<glm::vec3> m_normals;
 
-	struct Triangle
+	/*struct Triangle
 	{
 		std::vector<unsigned int> m_vertexIndices;
 		std::vector<unsigned int> m_textureCoordinateIndices;
 		std::vector<unsigned int> m_normalIndices;
 	};
 
-	std::vector<Triangle> m_triangles;*/
-	std::vector<Vertex> m_vertices;
+	std::vector<Triangle> m_triangles;
+	std::vector<Vertex> m_vertices;*/
 	std::string m_name;
 	unsigned int m_vao;
 	unsigned int m_vbo;
