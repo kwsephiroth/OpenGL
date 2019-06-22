@@ -6,6 +6,7 @@
 #include <glm/gtc/matrix_transform.hpp> // glm::translate, glm::rotate, glm::scale, glm::perspective
 #include <SOIL2/soil2.h>
 #include "../Shader.h"
+#include "../ModelLoader.h"
 #include <iostream>
 
 #define numVAOs 1
@@ -43,6 +44,7 @@ static bool GLLogCall(const char* function, const char* file, int line)
 
 static void init(GLFWwindow* window)
 {
+	auto model = ModelLoader::LoadModelFromOBJFile("res/models/shuttle.obj");
 	Shader shader("res/shaders/vertexShader.glsl", "res/shaders/fragmentShader.glsl");
 	renderingProgram = shader.Program;
 }
