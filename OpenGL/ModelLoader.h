@@ -14,15 +14,23 @@ enum class Tag
 	Smoothed
 };
 
+enum class ErrorCode
+{
+	Fail=-1,
+	Success=1
+};
+
 class ModelLoader
 {
 private:
 	static void SplitLineByDelimeter(const std::string& line, char delimiter, std::queue < std::string>& destination);
+	static void SplitFaceLine(const std::string& line, std::queue < std::string>& destination);
 	static Tag GetTag(const std::string& tagString);
 
-	static void StoreVertex(std::queue<std::string>& vertexStrings, Model& destinationModel);
-	static void StoreTextureCoordinate(std::queue<std::string>& textureCoordinateStrings, Model& destinationModel);
-	static void StoreVertexNormal(std::queue<std::string>& vertexNormalStrings, Model& destinationModel);
+	static void StoreVertexLocation(std::queue<std::string>& vertexSegments, Model& destinationModel);
+	static void StoreTextureCoordinate(std::queue<std::string>& textureCoordinateSegments, Model& destinationModel);
+	static void StoreVertexNormal(std::queue<std::string>& vertexNormalSegments, Model& destinationModel);
+	static void StoreFace(std::queue<std::string>& faceSegments, Model& destinationModel);
 
 	ModelLoader();
 public:
