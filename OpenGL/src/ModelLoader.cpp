@@ -275,7 +275,7 @@ void ModelLoader::StoreFace(std::queue<std::string>& faceSegments, Model & desti
 				v.normal[2] = 0;
 			}
 
-		    std::cout << "(" << v.textureCoordinates[0] << ", " << v.textureCoordinates[1] << ")" << std::endl;
+		    //std::cout << "(" << v.textureCoordinates[0] << ", " << v.textureCoordinates[1] << ")" << std::endl;
 			destinationModel.m_vertices.push_back(std::move(v));
 		}
 
@@ -290,7 +290,7 @@ Model ModelLoader::LoadModelFromOBJFile(const char * modelFilePath)
 	std::cout << "ModelLoader::LoadModelFromOBJFile - Loading model at path '" << modelFilePath << "' ..." << std::endl;
 	Model loadedModel;
 	std::ifstream modelFileStream(modelFilePath, std::ios::in);
-
+int numFaces = 0;
 	if (!modelFileStream.good())
 	{
 		std::cout << "ERROR: Failed to open file at path '" << modelFilePath << "'" << std::endl;
@@ -298,6 +298,7 @@ Model ModelLoader::LoadModelFromOBJFile(const char * modelFilePath)
 	}
 	else
 	{
+		
 		int i = 1;
 		std::string line;
 		while (!modelFileStream.eof())
@@ -363,6 +364,7 @@ Model ModelLoader::LoadModelFromOBJFile(const char * modelFilePath)
 				{
 					try
 					{
+						++numFaces;
 						StoreFace(lineSegments, loadedModel);
 					}
 					catch (std::exception e)
@@ -401,6 +403,8 @@ Model ModelLoader::LoadModelFromOBJFile(const char * modelFilePath)
 	std::cout << "Number of positions: " << loadedModel.m_positions.size() << std::endl;
 	std::cout << "Number of texture coordinates: " << loadedModel.m_textureCoordinates.size() << std::endl;
 	std::cout << "Number of normals: " << loadedModel.m_normals.size() << std::endl;
+	std::cout << "Number of triangles: " << numFaces << std::endl;
+	std::cout << "Number of vertices: " << loadedModel.m_vertices.size() << std::endl;
 	std::cout << "ModelLoader::LoadModelFromOBJFile - Model loaded complete." << std::endl;
 
 	return loadedModel;
