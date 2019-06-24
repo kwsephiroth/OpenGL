@@ -43,4 +43,9 @@
   <ItemGroup>
     <Object Include="res\models\shuttle.obj" />
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\textures\spstob_1.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
 </Project>

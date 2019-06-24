@@ -3,10 +3,12 @@
 #include <fstream>
 #include <iostream>
 #include <queue>
+#include <memory>
 
 enum class Tag
 {
 	None,
+	ObjectName,
 	Vertex,
 	TextureCoordinate,
 	VertexNormal,
@@ -32,7 +34,9 @@ private:
 	static void StoreVertexNormal(std::queue<std::string>& vertexNormalSegments, Model& destinationModel);
 	static void StoreFace(std::queue<std::string>& faceSegments, Model& destinationModel);
 
+	static void LoadTexture(const char * textureFilePath, Model& destinationModel);
+
 	ModelLoader();
 public:
-	static Model LoadModelFromOBJFile(const char* modelFilePath);
+	static Model LoadModelFromOBJFile(const char* modelFilePath, const char* textureFilePath = nullptr);
 };

@@ -57,7 +57,9 @@ void ModelLoader::SplitFaceLine(const std::string & line, std::queue<std::string
 
 Tag ModelLoader::GetTag(const std::string & tagString)
 {
-	if (tagString == "v")
+	if (tagString == "o")
+		return Tag::ObjectName;
+	else if (tagString == "v")
 		return Tag::Vertex;
 	else if (tagString == "vt")
 		return Tag::TextureCoordinate;
@@ -190,16 +192,16 @@ void ModelLoader::StoreFace(std::queue<std::string>& faceSegments, Model & desti
 	if (faceSegments.empty())
 		return;
 
-	if (faceSegments.size() != 3)
+	if (faceSegments.size() < 3)
 	{
-		std::cout << "ERROR: Failed to store model face: Exactly three components expected." << std::endl;
+		std::cout << "ERROR: Failed to store model face: At least three components expected." << std::endl;
 		destinationModel.m_initialized = false;
 		return;
 	}
 
 	while (!faceSegments.empty())
 	{
-		int positionIndex, textureCoorIndex, normalIndex;
+		int positionIndex = -1, textureCoorIndex = -1, normalIndex = -1;
 
 		//example 2/7/3 5/8/3 3/9/3
 		std::queue<std::string> indexSegments;
@@ -241,7 +243,7 @@ void ModelLoader::StoreFace(std::queue<std::string>& faceSegments, Model & desti
 			}
 			else
 			{
-				std::cout << "ERROR: Invalid vertex position index '" << positionIndex << "'" << std::endl;
+				//std::cout << "ERROR: Invalid vertex position index '" << positionIndex << "'" << std::endl;
 				v.position[0] = 0;
 				v.position[1] = 0;
 				v.position[2] = 0;
@@ -255,7 +257,7 @@ void ModelLoader::StoreFace(std::queue<std::string>& faceSegments, Model & desti
 			}
 			else
 			{
-				std::cout << "ERROR: Invalid texture coordinate index '" << textureCoorIndex << "'" << std::endl;
+				//std::cout << "ERROR: Invalid texture coordinate index '" << textureCoorIndex << "'" << std::endl;
 				v.textureCoordinates[0] = 0;
 				v.textureCoordinates[1] = 0;
 			}
@@ -269,13 +271,13 @@ void ModelLoader::StoreFace(std::queue<std::string>& faceSegments, Model & desti
 			}
 			else
 			{
-				std::cout << "ERROR: Invalid normal index '" << normalIndex << "'" << std::endl;
+				//std::cout << "ERROR: Invalid normal index '" << normalIndex << "'" << std::endl;
 				v.normal[0] = 0;
 				v.normal[1] = 0;
 				v.normal[2] = 0;
 			}
 
-		    //std::cout << "(" << v.textureCoordinates[0] << ", " << v.textureCoordinates[1] << ")" << std::endl;
+		    //std::cout << "(" << v.position[0] << ", " << v.position[1] << ", "<< v.position[2] << ")" << std::endl;
 			destinationModel.m_vertices.push_back(std::move(v));
 		}
 
@@ -285,10 +287,19 @@ void ModelLoader::StoreFace(std::queue<std::string>& faceSegments, Model & desti
 	//std::cout << std::endl;
 }
 
-Model ModelLoader::LoadModelFromOBJFile(const char * modelFilePath)
+void ModelLoader::LoadTexture(const char * textureFilePath, Model& destinationModel)
+{
+	if (textureFilePath == nullptr)
+		return;
+
+}
+
+Model ModelLoader::LoadModelFromOBJFile(const char * modelFilePath, const char* textureFilePath)
 {
 	std::cout << "ModelLoader::LoadModelFromOBJFile - Loading model at path '" << modelFilePath << "' ..." << std::endl;
 	Model loadedModel;
+	loadedModel.m_initialized = true;
+
 	std::ifstream modelFileStream(modelFilePath, std::ios::in);
 int numFaces = 0;
 	if (!modelFileStream.good())
@@ -315,6 +326,20 @@ int numFaces = 0;
 
 			switch (lineTag)
 			{
+				case Tag::ObjectName:
+				{
+					if (!lineSegments.empty())
+					{
+						loadedModel.m_name = lineSegments.front();
+						lineSegments.pop();
+					}
+					//else
+					//{
+						//TODO: Assign a default object name based on the model file name.
+					//}
+				}
+				break;
+
 				case Tag::Vertex:
 				{
 					try
@@ -399,13 +424,24 @@ int numFaces = 0;
 			++i;
 		}
 	}	
-	
-	std::cout << "Number of positions: " << loadedModel.m_positions.size() << std::endl;
-	std::cout << "Number of texture coordinates: " << loadedModel.m_textureCoordinates.size() << std::endl;
-	std::cout << "Number of normals: " << loadedModel.m_normals.size() << std::endl;
-	std::cout << "Number of triangles: " << numFaces << std::endl;
-	std::cout << "Number of vertices: " << loadedModel.m_vertices.size() << std::endl;
-	std::cout << "ModelLoader::LoadModelFromOBJFile - Model loaded complete." << std::endl;
+
+	//if (loadedModel.m_name.empty())
+	//{
+		//TODO: Assign a default object name based on the model file name.
+	//}
+
+	if (loadedModel.IsInitialized())
+	{
+		loadedModel.SetupVAO();
+
+		std::cout << "Object Name: " << loadedModel.m_name << std::endl;
+		std::cout << "Number of positions: " << loadedModel.m_positions.size() << std::endl;
+		std::cout << "Number of texture coordinates: " << loadedModel.m_textureCoordinates.size() << std::endl;
+		std::cout << "Number of normals: " << loadedModel.m_normals.size() << std::endl;
+		std::cout << "Number of faces: " << numFaces << std::endl;
+		std::cout << "Number of vertices: " << loadedModel.m_vertices.size() << std::endl;
+		std::cout << "ModelLoader::LoadModelFromOBJFile - Model loaded complete." << std::endl;
+	}
 
 	return loadedModel;
 }

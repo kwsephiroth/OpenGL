@@ -129,7 +129,7 @@ int main(void)
 	if (errorCode != GLEW_OK)
 		std::cout << "glewInit() failed with error code (" << errorCode << ")" << std::endl;
 
-	std::cout << "OpenGL Version: " << glGetString(GL_VERSION) << std::endl;
+	//std::cout << "OpenGL Version: " << glGetString(GL_VERSION) << std::endl;
 	
 	setup_vertices();
 	init(window);
