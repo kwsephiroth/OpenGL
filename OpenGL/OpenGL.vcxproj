@@ -153,10 +153,12 @@
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Model.cpp" />
     <ClCompile Include="src\ModelLoader.cpp" />
+    <ClCompile Include="src\Renderer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Model.h" />
     <ClInclude Include="ModelLoader.h" />
+    <ClInclude Include="Renderer.h" />
     <ClInclude Include="Shader.h" />
   </ItemGroup>
   <ItemGroup>

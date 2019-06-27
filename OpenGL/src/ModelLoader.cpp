@@ -294,14 +294,17 @@ void ModelLoader::LoadTexture(const char * textureFilePath, Model& destinationMo
 
 }
 
-Model ModelLoader::LoadModelFromOBJFile(const char * modelFilePath, const char* textureFilePath)
+std::unique_ptr<Model> ModelLoader::LoadModelFromOBJFile(const char * modelFilePath, const char* textureFilePath)
 {
 	std::cout << "ModelLoader::LoadModelFromOBJFile - Loading model at path '" << modelFilePath << "' ..." << std::endl;
-	Model loadedModel;
+
+	std::unique_ptr<Model> loadedModelPtr(new Model());//Allocate blank Model on heap first
+	Model& loadedModel = *loadedModelPtr;
 	loadedModel.m_initialized = true;
 
 	std::ifstream modelFileStream(modelFilePath, std::ios::in);
-int numFaces = 0;
+	int numFaces = 0;
+	
 	if (!modelFileStream.good())
 	{
 		std::cout << "ERROR: Failed to open file at path '" << modelFilePath << "'" << std::endl;
@@ -350,7 +353,7 @@ int numFaces = 0;
 					{
 						std::cout << "ERROR: Failed to store model vertex: " << e.what() << std::endl;
 						loadedModel.m_initialized = false;
-						return loadedModel;
+						return nullptr;
 					}
 				}
 				break;
@@ -365,7 +368,7 @@ int numFaces = 0;
 					{
 						std::cout << "ERROR: Failed to store model texture coordinate: " << e.what() << std::endl;
 						loadedModel.m_initialized = false;
-						return loadedModel;
+						return nullptr;
 					}
 				}
 				break;
@@ -380,7 +383,7 @@ int numFaces = 0;
 					{
 						std::cout << "ERROR: Failed to store model vertex normal: " << e.what() << std::endl;
 						loadedModel.m_initialized = false;
-						return loadedModel;
+						return nullptr;
 					}
 				}
 				break;
@@ -396,7 +399,7 @@ int numFaces = 0;
 					{
 						std::cout << "ERROR: Failed to store model face: " << e.what() << std::endl;
 						loadedModel.m_initialized = false;
-						return loadedModel;
+						return nullptr;
 					}
 				}
 				break;
@@ -443,5 +446,5 @@ int numFaces = 0;
 		std::cout << "ModelLoader::LoadModelFromOBJFile - Model loaded complete." << std::endl;
 	}
 
-	return loadedModel;
+	return loadedModelPtr;
 }

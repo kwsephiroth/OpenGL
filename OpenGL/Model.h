@@ -50,6 +50,20 @@ struct Vertex
 	}*/
 };
 
+enum class VertexAttributeType
+{
+	Position,
+	Color,
+	TextureCoordinate,
+	Normal
+};
+
+struct VertexAttribute
+{
+	VertexAttributeType type;
+	unsigned int location;
+};
+
 class Model
 {
 private:

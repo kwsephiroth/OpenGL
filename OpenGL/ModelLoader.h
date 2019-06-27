@@ -38,5 +38,5 @@ private:
 
 	ModelLoader();
 public:
-	static Model LoadModelFromOBJFile(const char* modelFilePath, const char* textureFilePath = nullptr);
+	static std::unique_ptr<Model> LoadModelFromOBJFile(const char* modelFilePath, const char* textureFilePath = nullptr);
 };
