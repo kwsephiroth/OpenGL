@@ -4,6 +4,7 @@
 #include <iostream>
 #include <queue>
 #include <memory>
+#include <SOIL2/soil2.h>
 
 enum class Tag
 {

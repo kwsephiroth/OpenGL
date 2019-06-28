@@ -2,45 +2,46 @@
 
 Model::Model()
 {
-	auto typeSize = sizeof(float);
-	m_positionSize = 3;
-	m_colorSize = 3;
-	m_textureCoorSize = 2;
-	m_normalSize = 3;
-	m_positionOffset = 0;
-	m_colorOffset = typeSize * 3;
-	m_textureOffset = typeSize * 6;
-	m_normalOffset = typeSize * 8;
-	m_vertexSize = sizeof(Vertex);
 }
 
-void Model::SetupVAO()
+void Model::SetupVBOs()
 {
-	glGenVertexArrays(1, &m_vao);
-	glGenBuffers(1, &m_vbo);
+	glGenBuffers(m_numVBOs, m_vbos);
 
-	glBindVertexArray(m_vao);
-	glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(m_vertices), &m_vertices, GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, m_vbos[0]);
+	glBufferData(GL_ARRAY_BUFFER, m_positionValues.size() * 4, &m_positionValues[0], GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_vbos[1]);
+	glBufferData(GL_ARRAY_BUFFER, m_textureCoorValues.size() * 4, &m_textureCoorValues[0], GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_vbos[2]);
+	glBufferData(GL_ARRAY_BUFFER, m_normalValues.size() * 4, &m_normalValues[0], GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
 }
 
 Model::~Model()
 {
-	glDeleteVertexArrays(1, &m_vao);
-	glDeleteBuffers(1, &m_vbo);
+	Unbind();
+	glDeleteBuffers(m_numVBOs, m_vbos);
 }
 
-void Model::Bind()
+void Model::Bind(unsigned int positionAttribLocation, unsigned int textureAttribLocation)
 {
-	glBindVertexArray(m_vao);
-	glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, m_vbos[0]);
+	glVertexAttribPointer(positionAttribLocation, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(positionAttribLocation);
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_vbos[1]);
+	glVertexAttribPointer(textureAttribLocation, 2, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(textureAttribLocation);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, m_textureID);
 }
 
 void Model::Unbind()
 {
-	glBindVertexArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glActiveTexture(0);
 }

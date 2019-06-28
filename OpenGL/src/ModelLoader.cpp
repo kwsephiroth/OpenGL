@@ -208,20 +208,18 @@ void ModelLoader::StoreFace(std::queue<std::string>& faceSegments, Model & desti
 		SplitFaceLine(faceSegments.front(), indexSegments);
 		
 		auto indicesCount = indexSegments.size();
-		//std::cout << indicesCount << " ";
 
 		if (indicesCount >= 1)
 		{
-			auto& indexStr = indexSegments.front(); //std::cout << indexStr << "/";
+			auto& indexStr = indexSegments.front();
 			
 			positionIndex = (indexStr.empty() ? -1 : (std::stoi(indexStr) - 1));
 			indexSegments.pop();
 
 			if (indicesCount > 1)
 			{
-				indexStr = indexSegments.front(); //std::cout << indexStr << "/";
+				indexStr = indexSegments.front();
 				textureCoorIndex = (indexStr.empty() ? -1 : (std::stoi(indexStr) - 1));
-				//std::cout << textureCoorIndex << std::endl;
 				indexSegments.pop();
 			}
 			
@@ -233,58 +231,32 @@ void ModelLoader::StoreFace(std::queue<std::string>& faceSegments, Model & desti
 			}
 
 			//Now finally add a position, texture coordinate, and normal
-			Vertex v;
 			if (positionIndex > -1 && positionIndex < (int)(destinationModel.m_positions.size()))
 			{
 				const auto & position = destinationModel.m_positions[positionIndex];
-				v.position[0] = position.x;
-				v.position[1] = position.y;
-				v.position[2] = position.z;
-			}
-			else
-			{
-				//std::cout << "ERROR: Invalid vertex position index '" << positionIndex << "'" << std::endl;
-				v.position[0] = 0;
-				v.position[1] = 0;
-				v.position[2] = 0;
+				destinationModel.m_positionValues.push_back(position.x);
+				destinationModel.m_positionValues.push_back(position.y);
+				destinationModel.m_positionValues.push_back(position.z);
 			}
 
 			if (textureCoorIndex > -1 && textureCoorIndex < (int)(destinationModel.m_textureCoordinates.size()))
 			{
 				const auto & textCoordinate = destinationModel.m_textureCoordinates[textureCoorIndex];
-				v.textureCoordinates[0] = textCoordinate.s;
-				v.textureCoordinates[1] = textCoordinate.t;
-			}
-			else
-			{
-				//std::cout << "ERROR: Invalid texture coordinate index '" << textureCoorIndex << "'" << std::endl;
-				v.textureCoordinates[0] = 0;
-				v.textureCoordinates[1] = 0;
+				destinationModel.m_textureCoorValues.push_back(textCoordinate.s);
+				destinationModel.m_textureCoorValues.push_back(textCoordinate.t);
 			}
 
 			if (normalIndex > -1 && normalIndex < (int)(destinationModel.m_normals.size()))
 			{
 				const auto & normal = destinationModel.m_normals[normalIndex];
-				v.normal[0] = normal.x;
-				v.normal[1] = normal.y;
-				v.normal[2] = normal.z;
+				destinationModel.m_normalValues.push_back(normal.x);
+				destinationModel.m_normalValues.push_back(normal.y);
+				destinationModel.m_normalValues.push_back(normal.z);
 			}
-			else
-			{
-				//std::cout << "ERROR: Invalid normal index '" << normalIndex << "'" << std::endl;
-				v.normal[0] = 0;
-				v.normal[1] = 0;
-				v.normal[2] = 0;
-			}
-
-		    //std::cout << "(" << v.position[0] << ", " << v.position[1] << ", "<< v.position[2] << ")" << std::endl;
-			destinationModel.m_vertices.push_back(std::move(v));
 		}
 
 		faceSegments.pop();
 	}
-
-	//std::cout << std::endl;
 }
 
 void ModelLoader::LoadTexture(const char * textureFilePath, Model& destinationModel)
@@ -292,6 +264,24 @@ void ModelLoader::LoadTexture(const char * textureFilePath, Model& destinationMo
 	if (textureFilePath == nullptr)
 		return;
 
+	GLuint textureRef;
+	textureRef = SOIL_load_OGL_texture(textureFilePath, SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_INVERT_Y);
+	if (textureRef == 0)
+	{
+		std::cout << "ERROR: Didnt find texture file '" << textureFilePath << "'" << std::endl;
+		destinationModel.m_initialized = false;
+	}
+	// ----- mipmap/anisotropic section
+	glBindTexture(GL_TEXTURE_2D, textureRef);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glGenerateMipmap(GL_TEXTURE_2D);
+	if (glewIsSupported("GL_EXT_texture_filter_anisotropic")) {
+		GLfloat anisoset = 0.0f;
+		glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &anisoset);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, anisoset);
+	}
+	// ----- end of mipmap/anisotropic section
+	destinationModel.m_textureID = textureRef;
 }
 
 std::unique_ptr<Model> ModelLoader::LoadModelFromOBJFile(const char * modelFilePath, const char* textureFilePath)
@@ -433,18 +423,25 @@ std::unique_ptr<Model> ModelLoader::LoadModelFromOBJFile(const char * modelFileP
 		//TODO: Assign a default object name based on the model file name.
 	//}
 
+	if (textureFilePath != nullptr)
+	{
+		//Attempt to load texture
+		LoadTexture(textureFilePath, loadedModel);
+	}
+
 	if (loadedModel.IsInitialized())
 	{
-		loadedModel.SetupVAO();
+		loadedModel.SetupVBOs();
 
 		std::cout << "Object Name: " << loadedModel.m_name << std::endl;
 		std::cout << "Number of positions: " << loadedModel.m_positions.size() << std::endl;
 		std::cout << "Number of texture coordinates: " << loadedModel.m_textureCoordinates.size() << std::endl;
 		std::cout << "Number of normals: " << loadedModel.m_normals.size() << std::endl;
 		std::cout << "Number of faces: " << numFaces << std::endl;
-		std::cout << "Number of vertices: " << loadedModel.m_vertices.size() << std::endl;
+		std::cout << "Number of vertices: " << loadedModel.GetNumberOfVertices() << std::endl;
 		std::cout << "ModelLoader::LoadModelFromOBJFile - Model loaded complete." << std::endl;
+		return loadedModelPtr;
 	}
-
-	return loadedModelPtr;
+	
+	return nullptr;
 }

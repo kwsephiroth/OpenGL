@@ -7,6 +7,7 @@
 #include <SOIL2/soil2.h>
 #include "../Shader.h"
 #include "../ModelLoader.h"
+#include "../Renderer.h"
 #include <iostream>
 
 #define numVAOs 1
@@ -24,7 +25,12 @@ unsigned int ibo[numIBOs];
 
 unsigned int renderingProgram;
 
+int width, height;
+float aspect;
+glm::mat4 pMat;
 
+unsigned int positionAttribLocation;
+unsigned int textureAttribLocation;
 
 static void GLClearError()
 {
@@ -44,11 +50,20 @@ static bool GLLogCall(const char* function, const char* file, int line)
 
 static void init(GLFWwindow* window)
 {
-	auto model = ModelLoader::LoadModelFromOBJFile("res/models/shuttle.obj");
 	Shader shader("res/shaders/vertexShader.glsl", "res/shaders/fragmentShader.glsl");
 	renderingProgram = shader.Program;
+	positionAttribLocation = glGetAttribLocation(renderingProgram, "position");
+	textureAttribLocation = glGetAttribLocation(renderingProgram,  "tex_coord");
+	glfwGetFramebufferSize(window, &width, &height);
+	aspect = (float)width / (float)height;
+	pMat = glm::perspective(1.0472f, aspect, 0.1f, 1000.0f);
 }
 
+static void window_size_callback(GLFWwindow* win, int newWidth, int newHeight) {
+	aspect = (float)newWidth / (float)newHeight;
+	glViewport(0, 0, newWidth, newHeight);
+	pMat = glm::perspective(1.0472f, aspect, 0.1f, 1000.0f);
+}
 static void setup_vertices()
 {
 	float positions[] = {
@@ -109,7 +124,7 @@ int main(void)
 
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	//glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	/* Create a windowed mode window and its OpenGL context */
 	window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
@@ -129,17 +144,30 @@ int main(void)
 	if (errorCode != GLEW_OK)
 		std::cout << "glewInit() failed with error code (" << errorCode << ")" << std::endl;
 
+
+	glfwSetWindowSizeCallback(window, window_size_callback);
 	//std::cout << "OpenGL Version: " << glGetString(GL_VERSION) << std::endl;
 	
-	setup_vertices();
+	//setup_vertices();
 	init(window);
 
+	Renderer r(renderingProgram, positionAttribLocation, textureAttribLocation);
+	{
+		//Attempt to generate model object
+		auto model = ModelLoader::LoadModelFromOBJFile("res/models/shuttle.obj", "res/textures/spstob_1.jpg");
+		if (model)
+		{
+			//std::cout << "model.NumberOfVertices() = " << model->GetNumberOfVertices() << std::endl;
+			r.AddModel(std::move(model));
+		}
+	}
 	/* Loop until the user closes the window */
 	while (!glfwWindowShouldClose(window))
 	{
 		/* Render here */
 		GLCall(glClear(GL_COLOR_BUFFER_BIT));
-		draw(window, glfwGetTime());
+		//draw(window, glfwGetTime());
+		r.RenderModels();
 
 		/* Swap front and back buffers */
 		glfwSwapBuffers(window);
