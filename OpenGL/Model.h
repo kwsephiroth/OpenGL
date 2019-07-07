@@ -46,21 +46,14 @@ private:
 	std::string m_name;
 	unsigned int m_stride;
 	unsigned int m_textureID;
-	static const unsigned int m_numVBOs = 3;
-	unsigned int m_vbos[m_numVBOs];
+	unsigned int m_numVBOs;
+	std::vector<unsigned int> m_vbos;
 
 	bool m_initialized = false;
 	bool m_smoothed = false;
 
-	size_t m_positionOffset;
-	size_t m_colorOffset;
-	size_t m_textureOffset;
-	size_t m_normalOffset;
-	size_t m_positionSize;
-	size_t m_colorSize;
-	size_t m_textureCoorSize;
-	size_t m_normalSize;
-	size_t m_vertexSize;
+	glm::mat4 m_modelMatrix;
+	glm::vec3 m_initialWorldPosition;
 
 	//TODO: Texture m_texture;
 
@@ -78,6 +71,14 @@ public:
 	inline bool IsInitialized() const { return m_initialized; }
 	inline unsigned int GetNumberOfVertices() const { return m_positionValues.size() / 3; }
 	inline std::string GetName() const { return m_name; }
+	bool HasTexture() { return (!m_textureCoordinates.empty() ? true : false); }
+	bool HasNormals() { return (!m_normals.empty() ? true : false); }
+
+	void SetModelMatrix(glm::mat4&& modelMatrix) { m_modelMatrix = std::move(modelMatrix); }
+	const glm::mat4& GetModelMatrix() const { return m_modelMatrix; }
+	const glm::vec3& GetInitialWorldPosition() const { return m_initialWorldPosition; }
+	void ResetWorldPosition();
+	void ResetWorldPosition(glm::vec3 worldPosition);
 
 	friend class ModelLoader;
 };

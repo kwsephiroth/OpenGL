@@ -2,6 +2,7 @@
 #include "Model.h"
 #include <fstream>
 #include <iostream>
+#include <string>
 #include <queue>
 #include <memory>
 #include <SOIL2/soil2.h>
@@ -39,5 +40,5 @@ private:
 
 	ModelLoader();
 public:
-	static std::unique_ptr<Model> LoadModelFromOBJFile(const char* modelFilePath, const char* textureFilePath = nullptr);
+	static std::unique_ptr<Model> LoadModelFromOBJFile(const std::string& modelName, const std::string& modelFilePath, const std::string& textureFilePath,  const glm::vec3 initalWorldPosition = { 0,0,0 });
 };

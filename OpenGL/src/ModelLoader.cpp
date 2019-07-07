@@ -284,13 +284,26 @@ void ModelLoader::LoadTexture(const char * textureFilePath, Model& destinationMo
 	destinationModel.m_textureID = textureRef;
 }
 
-std::unique_ptr<Model> ModelLoader::LoadModelFromOBJFile(const char * modelFilePath, const char* textureFilePath)
+std::unique_ptr<Model> ModelLoader::LoadModelFromOBJFile(const std::string& modelName, const std::string& modelFilePath, const std::string& textureFilePath, const glm::vec3 initalWorldPosition)
 {
 	std::cout << "ModelLoader::LoadModelFromOBJFile - Loading model at path '" << modelFilePath << "' ..." << std::endl;
+	
+	if (modelName.empty())
+	{
+		std::cout << "ERROR: Empty model name. Please provide a name for the model you wish to load." << std::endl;
+		return nullptr;
+	}
+
+	if (modelFilePath.empty())
+	{
+		std::cout << "ERROR: Empty obj file path. Please provide a valid obj file path." << std::endl;
+		return nullptr;
+	}
 
 	std::unique_ptr<Model> loadedModelPtr(new Model());//Allocate blank Model on heap first
 	Model& loadedModel = *loadedModelPtr;
 	loadedModel.m_initialized = true;
+	loadedModel.m_name = modelName;
 
 	std::ifstream modelFileStream(modelFilePath, std::ios::in);
 	int numFaces = 0;
@@ -319,7 +332,7 @@ std::unique_ptr<Model> ModelLoader::LoadModelFromOBJFile(const char * modelFileP
 
 			switch (lineTag)
 			{
-				case Tag::ObjectName:
+				/*case Tag::ObjectName:
 				{
 					if (!lineSegments.empty())
 					{
@@ -331,7 +344,7 @@ std::unique_ptr<Model> ModelLoader::LoadModelFromOBJFile(const char * modelFileP
 						//TODO: Assign a default object name based on the model file name.
 					//}
 				}
-				break;
+				break;*/
 
 				case Tag::Vertex:
 				{
@@ -423,17 +436,17 @@ std::unique_ptr<Model> ModelLoader::LoadModelFromOBJFile(const char * modelFileP
 		//TODO: Assign a default object name based on the model file name.
 	//}
 
-	if (textureFilePath != nullptr)
+	if (!textureFilePath.empty())
 	{
 		//Attempt to load texture
-		LoadTexture(textureFilePath, loadedModel);
+		LoadTexture(textureFilePath.c_str(), loadedModel);
 	}
 
 	if (loadedModel.IsInitialized())
 	{
 		loadedModel.SetupVBOs();
 
-		std::cout << "Object Name: " << loadedModel.m_name << std::endl;
+		std::cout << "Model Name: " << loadedModel.m_name << std::endl;
 		std::cout << "Number of positions: " << loadedModel.m_positions.size() << std::endl;
 		std::cout << "Number of texture coordinates: " << loadedModel.m_textureCoordinates.size() << std::endl;
 		std::cout << "Number of normals: " << loadedModel.m_normals.size() << std::endl;

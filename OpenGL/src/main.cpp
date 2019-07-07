@@ -64,6 +64,7 @@ static void window_size_callback(GLFWwindow* win, int newWidth, int newHeight) {
 	glViewport(0, 0, newWidth, newHeight);
 	pMat = glm::perspective(1.0472f, aspect, 0.1f, 1000.0f);
 }
+
 static void setup_vertices()
 {
 	float positions[] = {
@@ -154,10 +155,9 @@ int main(void)
 	Renderer r(renderingProgram, positionAttribLocation, textureAttribLocation);
 	{
 		//Attempt to generate model object
-		auto model = ModelLoader::LoadModelFromOBJFile("res/models/shuttle.obj", "res/textures/spstob_1.jpg");
+		auto model = ModelLoader::LoadModelFromOBJFile("shuttle", "res/models/shuttle.obj", "res/textures/spstob_1.jpg");
 		if (model)
 		{
-			//std::cout << "model.NumberOfVertices() = " << model->GetNumberOfVertices() << std::endl;
 			r.AddModel(std::move(model));
 		}
 	}
@@ -167,7 +167,14 @@ int main(void)
 		/* Render here */
 		GLCall(glClear(GL_COLOR_BUFFER_BIT));
 		//draw(window, glfwGetTime());
-		r.RenderModels();
+		r.SetAspectRatio(aspect);
+
+		//TODO: Apply any transforms to a model here
+
+
+		//Now render model(s)
+		//r.RenderModels();
+		r.RenderModel("shuttle");
 
 		/* Swap front and back buffers */
 		glfwSwapBuffers(window);
@@ -177,9 +184,9 @@ int main(void)
 	}
 	
 	//Clean up
-	glDeleteVertexArrays(numVAOs, vao);
-	glDeleteBuffers(numVBOs, vbo);
-	glDeleteBuffers(numIBOs, ibo);
+	//glDeleteVertexArrays(numVAOs, vao);
+	//glDeleteBuffers(numVBOs, vbo);
+	//glDeleteBuffers(numIBOs, ibo);
 
 	glfwTerminate();
 	return 0;
