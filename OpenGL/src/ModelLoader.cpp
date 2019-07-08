@@ -304,6 +304,7 @@ std::unique_ptr<Model> ModelLoader::LoadModelFromOBJFile(const std::string& mode
 	Model& loadedModel = *loadedModelPtr;
 	loadedModel.m_initialized = true;
 	loadedModel.m_name = modelName;
+	loadedModel.m_initialWorldPosition = initalWorldPosition;
 
 	std::ifstream modelFileStream(modelFilePath, std::ios::in);
 	int numFaces = 0;
@@ -445,6 +446,7 @@ std::unique_ptr<Model> ModelLoader::LoadModelFromOBJFile(const std::string& mode
 	if (loadedModel.IsInitialized())
 	{
 		loadedModel.SetupVBOs();
+		loadedModel.InitializeModelMatrix();
 
 		std::cout << "Model Name: " << loadedModel.m_name << std::endl;
 		std::cout << "Number of positions: " << loadedModel.m_positions.size() << std::endl;

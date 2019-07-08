@@ -38,15 +38,7 @@ void Renderer::RenderModel(const std::string & modelName)
 		projLoc = glGetUniformLocation(m_shaderProgramId, "proj_matrix");
 
 		vMat = glm::translate(glm::mat4(1.0f), glm::vec3(-cameraX, -cameraY, -cameraZ));
-		mMat = glm::translate(glm::mat4(1.0f), glm::vec3(objLocX, objLocY, objLocZ));
-
-		auto toRadians = [](float degrees) {return (degrees * 2.0f * 3.14159f) / 360.0f; };
-
-		mMat = glm::rotate(mMat, 0.0f, glm::vec3(1.0f, 0.0f, 0.0f));
-		mMat = glm::rotate(mMat, toRadians(135.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		mMat = glm::rotate(mMat, toRadians(35.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-
-		mvMat = vMat * mMat;
+		mvMat = vMat * m->GetModelMatrix();
 
 		glUniformMatrix4fv(mvLoc, 1, GL_FALSE, glm::value_ptr(mvMat));
 		pMat = glm::perspective(1.0472f, m_aspectRatio, 0.1f, 1000.0f);
@@ -69,6 +61,26 @@ void Renderer::RenderModel(const std::string & modelName)
 	}
 }
 
+void Renderer::GetModelMatrix(const std::string & modelName, glm::mat4& returnValue)
+{
+	auto itr = m_models.find(modelName);
+	if (itr != m_models.end())
+	{
+		returnValue = itr->second->GetModelMatrix();
+	}
+}
+
+const glm::vec3 Renderer::GetModelInitialWorldPosition(const std::string & modelName)
+{
+	auto itr = m_models.find(modelName);
+
+	if (itr != m_models.end())
+	{
+		return itr->second->GetInitialWorldPosition();
+	}
+	return glm::vec3(0, 0, 0);
+}
+
 void Renderer::RenderModels()
 {
 	using namespace std;
@@ -82,17 +94,7 @@ void Renderer::RenderModels()
 	projLoc = glGetUniformLocation(m_shaderProgramId, "proj_matrix");
 
 	vMat = glm::translate(glm::mat4(1.0f), glm::vec3(-cameraX, -cameraY, -cameraZ));
-	mMat = glm::translate(glm::mat4(1.0f), glm::vec3(objLocX, objLocY, objLocZ));
-
-	auto toRadians = [](float degrees) {return (degrees * 2.0f * 3.14159f) / 360.0f; };
-
-	mMat = glm::rotate(mMat, 0.0f, glm::vec3(1.0f, 0.0f, 0.0f));
-	mMat = glm::rotate(mMat, toRadians(135.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-	mMat = glm::rotate(mMat, toRadians(35.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-
-	mvMat = vMat * mMat;
-
-	glUniformMatrix4fv(mvLoc, 1, GL_FALSE, glm::value_ptr(mvMat));
+	
 	pMat = glm::perspective(1.0472f, m_aspectRatio, 0.1f, 1000.0f);
 	glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(pMat));
 	
@@ -102,6 +104,8 @@ void Renderer::RenderModels()
 		if (!m.second->IsInitialized())
 			continue;
 
+		mvMat = vMat * m.second->GetModelMatrix();	
+		glUniformMatrix4fv(mvLoc, 1, GL_FALSE, glm::value_ptr(mvMat));
 		m.second->Bind(m_positionAttribLocation, m_textureCoordAttribLocation);
 		glEnable(GL_DEPTH_TEST);
 		glDepthFunc(GL_LEQUAL);
@@ -133,5 +137,18 @@ void Renderer::AddModel(ModelPtr model)
 	else
 	{
 		std::cout << "ERROR: Failed to add model '" << model->GetName() << "' to collection. Model pointer is null." << std::endl;
+	}
+}
+
+void Renderer::SetModelMatrix(const std::string & modelName, glm::mat4&& modelMatrix)
+{
+	auto itr = m_models.find(modelName);
+	if (itr != m_models.end())
+	{
+		itr->second->SetModelMatrix(std::move(modelMatrix));
+	}
+	else
+	{
+		std::cout << "ERROR: Failed to set the model matrix for model named '" << modelName << "'" << std::endl;
 	}
 }

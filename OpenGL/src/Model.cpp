@@ -32,6 +32,11 @@ void Model::SetupVBOs()
 	m_numVBOs = m_vbos.size();
 }
 
+void Model::InitializeModelMatrix()
+{
+	m_modelMatrix = glm::translate(glm::mat4(1.0f), m_initialWorldPosition);
+}
+
 Model::~Model()
 {
 	Unbind();
@@ -59,4 +64,9 @@ void Model::Unbind()
 {
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glActiveTexture(0);
+}
+
+void Model::ResetWorldPosition()
+{
+	InitializeModelMatrix();
 }

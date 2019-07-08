@@ -42,11 +42,13 @@ public:
 	~Renderer();
 
 	void RenderModel(const std::string& modelName);
-	void GetModelMatrix(const std::string& modelName);
 	void RenderModels();
 	void AddModel(ModelPtr model);
 	void RemoveModel(const std::string& modelName);
 	void ClearModels();
 	void SetShaderProgramId(unsigned int shaderProgramId) { m_shaderProgramId = shaderProgramId; }
 	void SetAspectRatio(float aspectRatio) { m_aspectRatio = aspectRatio; }
+	void SetModelMatrix(const std::string& modelName, glm::mat4&& modelMatrix);
+	void GetModelMatrix(const std::string& modelName, glm::mat4& returnValue);
+	const glm::vec3 GetModelInitialWorldPosition(const std::string& modelName);
 };

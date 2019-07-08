@@ -161,17 +161,28 @@ int main(void)
 			r.AddModel(std::move(model));
 		}
 	}
+
+    auto toRadians = [](float degrees) {return (degrees * 2.0f * 3.14159f) / 360.0f; };
+	
+	glm::mat4 tempModelMatrix;
+	
 	/* Loop until the user closes the window */
 	while (!glfwWindowShouldClose(window))
 	{
 		/* Render here */
 		GLCall(glClear(GL_COLOR_BUFFER_BIT));
 		//draw(window, glfwGetTime());
-		r.SetAspectRatio(aspect);
+		
 
 		//TODO: Apply any transforms to a model here
+		//r.GetModelMatrix("shuttle", tempModelMatrix);
+		tempModelMatrix = glm::translate(glm::mat4(1.0f), r.GetModelInitialWorldPosition("shuttle"));
+		tempModelMatrix = glm::rotate(tempModelMatrix, 0.0f, glm::vec3(1.0f, 0.0f, 0.0f));
+		tempModelMatrix = glm::rotate(tempModelMatrix, toRadians(135.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		tempModelMatrix = glm::rotate(tempModelMatrix, toRadians(35.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+		r.SetModelMatrix("shuttle", std::move(tempModelMatrix));
 
-
+		r.SetAspectRatio(aspect);
 		//Now render model(s)
 		//r.RenderModels();
 		r.RenderModel("shuttle");

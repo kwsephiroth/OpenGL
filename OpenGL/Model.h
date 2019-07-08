@@ -53,13 +53,13 @@ private:
 	bool m_smoothed = false;
 
 	glm::mat4 m_modelMatrix;
-	glm::vec3 m_initialWorldPosition;
+	glm::vec3 m_initialWorldPosition = { 0,0,0 };
 
 	//TODO: Texture m_texture;
 
 	Model();
 	void SetupVBOs();
-
+	void InitializeModelMatrix();
 public:
 	
 	~Model();
