@@ -254,7 +254,6 @@ void ModelLoader::StoreFace(std::queue<std::string>& faceSegments, Model & desti
 				destinationModel.m_normalValues.push_back(normal.z);
 			}
 		}
-
 		faceSegments.pop();
 	}
 }
@@ -322,6 +321,10 @@ std::unique_ptr<Model> ModelLoader::LoadModelFromOBJFile(const std::string& mode
 		while (!modelFileStream.eof())
 		{
 			std::getline(modelFileStream, line);
+			
+			if (line.empty())
+				continue; 
+
 			std::queue < std::string > lineSegments;
 			SplitLineByDelimeter(line, ' ', lineSegments);
 
@@ -455,6 +458,7 @@ std::unique_ptr<Model> ModelLoader::LoadModelFromOBJFile(const std::string& mode
 		std::cout << "Number of faces: " << numFaces << std::endl;
 		std::cout << "Number of vertices: " << loadedModel.GetNumberOfVertices() << std::endl;
 		std::cout << "ModelLoader::LoadModelFromOBJFile - Model loaded complete." << std::endl;
+
 		return loadedModelPtr;
 	}
 	

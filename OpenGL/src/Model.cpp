@@ -8,6 +8,7 @@ Model::Model()
 void Model::SetupVBOs()
 {
 	unsigned int vbo;
+	unsigned int current_vbo_index = 0;
 	glGenBuffers(1, &vbo);
 	m_vbos.push_back(vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, m_vbos[0]);
@@ -15,16 +16,18 @@ void Model::SetupVBOs()
 
 	if (HasTexture())
 	{
+		current_vbo_index++;
 		glGenBuffers(1, &vbo);
 		m_vbos.push_back(vbo);
-		glBindBuffer(GL_ARRAY_BUFFER, m_vbos[1]);
+		glBindBuffer(GL_ARRAY_BUFFER, m_vbos[current_vbo_index]);
 		glBufferData(GL_ARRAY_BUFFER, m_textureCoorValues.size() * 4, &m_textureCoorValues[0], GL_STATIC_DRAW);
 	}
 	if (HasNormals())
 	{
+		current_vbo_index++;
 		glGenBuffers(1, &vbo);
 		m_vbos.push_back(vbo);
-		glBindBuffer(GL_ARRAY_BUFFER, m_vbos[2]);
+		glBindBuffer(GL_ARRAY_BUFFER, m_vbos[current_vbo_index]);
 		glBufferData(GL_ARRAY_BUFFER, m_normalValues.size() * 4, &m_normalValues[0], GL_STATIC_DRAW);
 	}
 

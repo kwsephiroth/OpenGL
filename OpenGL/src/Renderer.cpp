@@ -110,8 +110,7 @@ void Renderer::RenderModels()
 		glEnable(GL_DEPTH_TEST);
 		glDepthFunc(GL_LEQUAL);
 		glDrawArrays(GL_TRIANGLES, 0, m.second->GetNumberOfVertices());
-		m.second->Unbind();
-		
+		m.second->Unbind();	
 	}
 	glBindVertexArray(0);
 }

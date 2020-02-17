@@ -1,6 +1,7 @@
 #version 430
 
 in vec2 tc;
+in vec4 my_color;
 out vec4 color;
 
 uniform mat4 mv_matrix;
@@ -9,5 +10,6 @@ layout (binding=0) uniform sampler2D s;
 
 void main(void)
 {
-	color = texture(s,tc);
+	//color = texture(s,tc);
+	color = my_color;
 }
