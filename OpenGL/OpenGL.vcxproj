@@ -150,6 +150,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\MaterialLoader.cpp" />
+    <ClCompile Include="src\Material.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Model.cpp" />
     <ClCompile Include="src\ModelLoader.cpp" />
@@ -157,6 +159,8 @@
     <ClCompile Include="src\WindowManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Material.h" />
+    <ClInclude Include="MaterialLoader.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="ModelLoader.h" />
     <ClInclude Include="Renderer.h" />
