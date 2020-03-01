@@ -457,7 +457,7 @@ std::unique_ptr<Model> ModelLoader::LoadModelFromOBJFile(const std::string& mode
 		std::cout << "Number of normals: " << loadedModel.m_normals.size() << std::endl;
 		std::cout << "Number of faces: " << numFaces << std::endl;
 		std::cout << "Number of vertices: " << loadedModel.GetNumberOfVertices() << std::endl;
-		std::cout << "ModelLoader::LoadModelFromOBJFile - Model loaded complete." << std::endl;
+		std::cout << "ModelLoader::LoadModelFromOBJFile - Model loaded complete." << std::endl << std::endl;
 
 		return loadedModelPtr;
 	}

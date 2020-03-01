@@ -30,6 +30,8 @@ void MaterialLoader::SplitLineByDelimeter(const std::string& line, char delimite
 
 std::unique_ptr<MaterialLoader::MaterialsMap> MaterialLoader::LoadMaterialFromMtlFile(const std::string& mtlFilePath)
 {
+	std::cout << "MaterialLoader::LoadMaterialFromMtlFile - Loading materials from mtl file at path '" << mtlFilePath << "' ..." << std::endl;
+
 	if (mtlFilePath.empty())
 	{
 		std::cout << "ERROR: Empty obj file path. Please provide a valid obj file path." << std::endl;
@@ -48,6 +50,8 @@ std::unique_ptr<MaterialLoader::MaterialsMap> MaterialLoader::LoadMaterialFromMt
 	else
 	{
 		std::string line;
+		Material* currentMtlPtr = nullptr;
+
 		while (!mtlFileStream.eof())
 		{
 			std::getline(mtlFileStream, line);
@@ -61,13 +65,11 @@ std::unique_ptr<MaterialLoader::MaterialsMap> MaterialLoader::LoadMaterialFromMt
 			const auto lineBeginStr = std::move(lineSegments.front());
 			lineSegments.pop();
 
-			Material* currentMtlPtr = nullptr;
-
 			if (lineBeginStr == "newmtl")
 			{
 				//Start of new material
 				auto mtlName = std::move(lineSegments.front());
-				mtlMapPtr->emplace(mtlName, new Material(mtlName));
+				mtlMapPtr->emplace(mtlName, Material(mtlName));
 				currentMtlPtr = &mtlMapPtr->find(mtlName)->second;
 				lineSegments.pop();
 			}
@@ -77,7 +79,7 @@ std::unique_ptr<MaterialLoader::MaterialsMap> MaterialLoader::LoadMaterialFromMt
 				{
 					if (currentMtlPtr)
 					{
-						currentMtlPtr->m_properties.specularExponent = std::stof(std::move(lineSegments.front()));
+						currentMtlPtr->m_properties.specularExponent = std::stod(std::move(lineSegments.front()));
 						lineSegments.pop();
 					}
 				}
@@ -173,6 +175,11 @@ std::unique_ptr<MaterialLoader::MaterialsMap> MaterialLoader::LoadMaterialFromMt
 
 			//}
 		}
+	}
+
+	for (const auto& pair : *mtlMapPtr)
+	{
+		std::cout << pair.second << std::endl;
 	}
 
 	return mtlMapPtr;

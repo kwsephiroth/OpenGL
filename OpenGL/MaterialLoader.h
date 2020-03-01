@@ -4,6 +4,7 @@
 #include <string>
 #include <unordered_map>
 #include <iostream>
+#include <iomanip>
 #include <fstream>
 #include <queue>
 
@@ -21,3 +22,13 @@ public:
 	static std::unique_ptr<MaterialsMap> LoadMaterialFromMtlFile(const std::string& mtlFilePath);
 };
 
+static std::ostream& operator << (std::ostream& os, const Material& mtl)
+{
+	os << "Material Name: " << mtl.m_name << std::endl;
+	os << "Ambient Color: " << std::setprecision(6) << std::fixed << mtl.m_properties.ambientColor.x << " " << mtl.m_properties.ambientColor.y << " " << mtl.m_properties.ambientColor.z << std::endl;
+	os << "Diffuse Color: " << mtl.m_properties.diffuseColor.x << " " << mtl.m_properties.diffuseColor.y << " " << mtl.m_properties.diffuseColor.z << std::endl;
+	os << "Specular Color: " << mtl.m_properties.specularColor.x << " " << mtl.m_properties.specularColor.y << " " << mtl.m_properties.specularColor.z << std::endl;
+	os << "Specular Exponent: " << mtl.m_properties.specularExponent << std::endl;
+
+	return os;
+}

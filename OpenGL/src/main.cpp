@@ -7,6 +7,7 @@
 #include <SOIL2/soil2.h>
 #include "../Shader.h"
 #include "../ModelLoader.h"
+#include "../MaterialLoader.h"
 #include "../Renderer.h"
 #include <iostream>
 
@@ -108,7 +109,7 @@ int main(void)
 		//Attempt to generate model object
 		//auto model = ModelLoader::LoadModelFromOBJFile("shuttle", "res/models/shuttle.obj", "res/textures/spstob_1.jpg");
 		auto model2 = ModelLoader::LoadModelFromOBJFile("bat", "res/models/bat.obj", "");
-
+		auto mtlMapPtr = MaterialLoader::LoadMaterialFromMtlFile("res/models/bat.mtl");
 		//if (model)
 		//{
 		//	r.AddModel(std::move(model));
