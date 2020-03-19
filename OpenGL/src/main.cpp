@@ -108,8 +108,8 @@ int main(void)
 	{
 		//Attempt to generate model object
 		//auto model = ModelLoader::LoadModelFromOBJFile("shuttle", "res/models/shuttle.obj", "res/textures/spstob_1.jpg");
-		auto model2 = ModelLoader::LoadModelFromOBJFile("bat", "res/models/bat.obj", "");
 		auto mtlMapPtr = MaterialLoader::LoadMaterialFromMtlFile("res/models/bat.mtl");
+		auto model2 = ModelLoader::LoadModelFromOBJFile("bat", "res/models/bat.obj", "");
 		//if (model)
 		//{
 		//	r.AddModel(std::move(model));

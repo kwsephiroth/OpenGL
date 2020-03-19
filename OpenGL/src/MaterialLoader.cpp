@@ -34,7 +34,7 @@ std::unique_ptr<MaterialLoader::MaterialsMap> MaterialLoader::LoadMaterialFromMt
 
 	if (mtlFilePath.empty())
 	{
-		std::cout << "ERROR: Empty obj file path. Please provide a valid obj file path." << std::endl;
+		std::cout << "ERROR: Empty mtl file path. Please provide a valid mtl file path." << std::endl;
 		return nullptr;
 	}
 
@@ -69,8 +69,8 @@ std::unique_ptr<MaterialLoader::MaterialsMap> MaterialLoader::LoadMaterialFromMt
 			{
 				//Start of new material
 				auto mtlName = std::move(lineSegments.front());
-				mtlMapPtr->emplace(mtlName, Material(mtlName));
-				currentMtlPtr = &mtlMapPtr->find(mtlName)->second;
+				auto mtlPair = mtlMapPtr->emplace(mtlName, Material(mtlName));
+				currentMtlPtr = &mtlPair.first->second;//&mtlMapPtr->find(mtlName)->second;
 				lineSegments.pop();
 			}
 			else if (lineBeginStr == "Ns")/* || lineBeginStr == "Ni" || lineBeginStr == "d")*/
