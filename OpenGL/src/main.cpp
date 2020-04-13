@@ -122,6 +122,7 @@ int main(void)
 		if (model2)
 		{
 			r.AddModel(std::move(model2));
+			r.SetMaterialsMap(std::move(mtlMapPtr));
 		}
 		else
 		{

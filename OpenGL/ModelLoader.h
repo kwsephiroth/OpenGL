@@ -15,7 +15,8 @@ enum class Tag
 	TextureCoordinate,
 	VertexNormal,
 	Face, 
-	Smoothed
+	Smoothed,
+	Material
 };
 
 enum class ErrorCode
@@ -34,7 +35,7 @@ private:
 	static void StoreVertexLocation(std::queue<std::string>& vertexSegments, Model& destinationModel);
 	static void StoreTextureCoordinate(std::queue<std::string>& textureCoordinateSegments, Model& destinationModel);
 	static void StoreVertexNormal(std::queue<std::string>& vertexNormalSegments, Model& destinationModel);
-	static void StoreFace(std::queue<std::string>& faceSegments, Model& destinationModel);
+	static void StoreFace(std::queue<std::string>& faceSegments, Model& destinationModel, const std::string& currentMtlName);
 
 	static void LoadTexture(const char * textureFilePath, Model& destinationModel);
 

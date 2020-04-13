@@ -46,12 +46,66 @@ void Renderer::RenderModel(const std::string & modelName)
 
 		glBindVertexArray(m_vao);
 
+			// white light
+			float globalAmbient[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+			//float lightAmbient[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+			//float lightDiffuse[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
+			//float lightSpecular[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
+
+		for (const auto& pair : m->m_mtlToVBOs)
+		{
+			//current material
+			const auto& currentMtl = m_materials->find(pair.first)->second;
+			float ambientColor[4] = { currentMtl.GetAmbientColor().x, currentMtl.GetAmbientColor().y , currentMtl.GetAmbientColor().z , 1 };
+			float diffuseColor[4] = { currentMtl.GetDiffuseColor().x, currentMtl.GetDiffuseColor().y , currentMtl.GetDiffuseColor().z , 1 };
+			float specularColor[4] = { currentMtl.GetSpecularColor().x, currentMtl.GetSpecularColor().y , currentMtl.GetSpecularColor().z , 1 };
+			float specularExponent = currentMtl.GetSpecularExponent();
+			float* matAmb = ambientColor;
+			float* matDif = diffuseColor;
+			float* matSpe = specularColor;
+			float matShi = specularExponent;
+
+			GLuint globalAmbLoc, ambLoc, diffLoc, specLoc, posLoc, mambLoc, mdiffLoc, mspecLoc, mshiLoc;
+
+			// get the locations of the light and material fields in the shader
+			globalAmbLoc = glGetUniformLocation(m_shaderProgramId, "globalAmbient");
+			//ambLoc = glGetUniformLocation(renderingProgram, "light.ambient");
+			//diffLoc = glGetUniformLocation(renderingProgram, "light.diffuse");
+			//specLoc = glGetUniformLocation(renderingProgram, "light.specular");
+			//posLoc = glGetUniformLocation(renderingProgram, "light.position");
+			mambLoc = glGetUniformLocation(m_shaderProgramId, "material.ambient");
+			mdiffLoc = glGetUniformLocation(m_shaderProgramId, "material.diffuse");
+			mspecLoc = glGetUniformLocation(m_shaderProgramId, "material.specular");
+			mshiLoc = glGetUniformLocation(m_shaderProgramId, "material.shininess");
+
+			//  set the uniform light and material values in the shader
+			glProgramUniform4fv(m_shaderProgramId, globalAmbLoc, 1, globalAmbient);
+			//glProgramUniform4fv(renderingProgram, ambLoc, 1, lightAmbient);
+			//glProgramUniform4fv(renderingProgram, diffLoc, 1, lightDiffuse);
+			//glProgramUniform4fv(renderingProgram, specLoc, 1, lightSpecular);
+			//glProgramUniform3fv(renderingProgram, posLoc, 1, lightPos);
+			glProgramUniform4fv(m_shaderProgramId, mambLoc, 1, matAmb);
+			glProgramUniform4fv(m_shaderProgramId, mdiffLoc, 1, matDif);
+			glProgramUniform4fv(m_shaderProgramId, mspecLoc, 1, matSpe);
+			glProgramUniform1f(m_shaderProgramId, mshiLoc, matShi);
+
+			const auto& vbos = pair.second;
+			glBindBuffer(GL_ARRAY_BUFFER, vbos.m_positionsVBO);
+			glVertexAttribPointer(m_positionAttribLocation, 3, GL_FLOAT, GL_FALSE, 0, 0);
+			glEnableVertexAttribArray(m_positionAttribLocation);
+			glEnable(GL_DEPTH_TEST);
+			glDepthFunc(GL_LEQUAL);
+			glDrawArrays(GL_TRIANGLES, 0, vbos.m_numberOfVertices);
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+			glActiveTexture(0);
+		}
+
 		//Model specific logic here
-		m->Bind(m_positionAttribLocation, m_textureCoordAttribLocation);
-		glEnable(GL_DEPTH_TEST);
-		glDepthFunc(GL_LEQUAL);
-		glDrawArrays(GL_TRIANGLES, 0, m->GetNumberOfVertices());
-		m->Unbind();
+		//m->Bind(m_positionAttribLocation, m_textureCoordAttribLocation);
+		//glEnable(GL_DEPTH_TEST);
+		//glDepthFunc(GL_LEQUAL);
+		//glDrawArrays(GL_TRIANGLES, 0, m->GetNumberOfVertices());
+		//m->Unbind();
 
 		glBindVertexArray(0);
 	}
@@ -84,9 +138,9 @@ const glm::vec3 Renderer::GetModelInitialWorldPosition(const std::string & model
 void Renderer::RenderModels()
 {
 	using namespace std;
-	glClear(GL_DEPTH_BUFFER_BIT);
+	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 	glClearColor(0.0, 0.0, 0.0, 1.0);
-	glClear(GL_COLOR_BUFFER_BIT);
+	//glClear(GL_COLOR_BUFFER_BIT);
 
 	glUseProgram(m_shaderProgramId);
 

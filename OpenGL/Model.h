@@ -7,6 +7,7 @@
 #include <glm\gtc\type_ptr.hpp> // glm::value_ptr
 #include <glm\gtc\matrix_transform.hpp> // glm::translate, glm::rotate, glm::scale, glm::perspective
 #include <iostream>
+#include <unordered_map>
 
 enum class VertexAttributeType
 {
@@ -28,6 +29,22 @@ struct VertexAttributeLocations
 	unsigned int color;
 	unsigned int texture;
 	unsigned int normal;
+};
+
+struct FaceCollection
+{
+	//Values in correct face (triangle) order
+	std::vector<float> m_positionValues;//Axis values stored separately one element at a time
+	std::vector<float> m_textureCoorValues;
+	std::vector<float> m_normalValues;
+};
+
+struct VBOCollection
+{
+	unsigned int m_positionsVBO;
+	unsigned int m_textureCoordsVBO;
+	unsigned int m_normalsVBO;
+	unsigned int m_numberOfVertices;
 };
 
 class Model
@@ -57,13 +74,16 @@ private:
 
 	//TODO: Texture m_texture;
 
+	std::unordered_map<std::string, FaceCollection> m_mtlToFaces;
+	//std::unordered_map<std::string, VBOCollection> m_mtlToVBOs;
+
 	Model();
 	void SetupVBOs();
 	void InitializeModelMatrix();
+
 public:
-	
 	~Model();
-	
+
 	void Bind(unsigned int positionAttribLocation, unsigned int textureAttribLocation);
 	void Unbind();
 
@@ -79,6 +99,8 @@ public:
 	const glm::vec3& GetInitialWorldPosition() const { return m_initialWorldPosition; }
 	void ResetWorldPosition();
 	void ResetWorldPosition(glm::vec3 worldPosition);
+	
+	std::unordered_map<std::string, VBOCollection> m_mtlToVBOs; //temporarily public
 
 	friend class ModelLoader;
 };

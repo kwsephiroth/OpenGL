@@ -69,6 +69,8 @@ Tag ModelLoader::GetTag(const std::string & tagString)
 		return Tag::Face;
 	else if (tagString == "s")
 		return Tag::Smoothed;
+	else if (tagString == "usemtl")
+		return Tag::Material;
 	else
 		return Tag::None;
 }
@@ -187,7 +189,7 @@ void ModelLoader::StoreVertexNormal(std::queue<std::string>& vertexNormalSegment
 	//}
 }
 
-void ModelLoader::StoreFace(std::queue<std::string>& faceSegments, Model & destinationModel)
+void ModelLoader::StoreFace(std::queue<std::string>& faceSegments, Model & destinationModel, const std::string& currentMtlName)
 {
 	if (faceSegments.empty())
 		return;
@@ -199,6 +201,8 @@ void ModelLoader::StoreFace(std::queue<std::string>& faceSegments, Model & desti
 		return;
 	}
 
+	FaceCollection& currentFaceCollection = destinationModel.m_mtlToFaces[currentMtlName];
+	
 	while (!faceSegments.empty())
 	{
 		int positionIndex = -1, textureCoorIndex = -1, normalIndex = -1;
@@ -209,6 +213,7 @@ void ModelLoader::StoreFace(std::queue<std::string>& faceSegments, Model & desti
 		
 		auto indicesCount = indexSegments.size();
 
+		
 		if (indicesCount >= 1)
 		{
 			auto& indexStr = indexSegments.front();
@@ -237,6 +242,9 @@ void ModelLoader::StoreFace(std::queue<std::string>& faceSegments, Model & desti
 				destinationModel.m_positionValues.push_back(position.x);
 				destinationModel.m_positionValues.push_back(position.y);
 				destinationModel.m_positionValues.push_back(position.z);
+				currentFaceCollection.m_positionValues.push_back(position.x);
+				currentFaceCollection.m_positionValues.push_back(position.y);
+				currentFaceCollection.m_positionValues.push_back(position.z);
 			}
 
 			if (textureCoorIndex > -1 && textureCoorIndex < (int)(destinationModel.m_textureCoordinates.size()))
@@ -244,6 +252,8 @@ void ModelLoader::StoreFace(std::queue<std::string>& faceSegments, Model & desti
 				const auto & textCoordinate = destinationModel.m_textureCoordinates[textureCoorIndex];
 				destinationModel.m_textureCoorValues.push_back(textCoordinate.s);
 				destinationModel.m_textureCoorValues.push_back(textCoordinate.t);
+				currentFaceCollection.m_textureCoorValues.push_back(textCoordinate.s);
+				currentFaceCollection.m_textureCoorValues.push_back(textCoordinate.t);
 			}
 
 			if (normalIndex > -1 && normalIndex < (int)(destinationModel.m_normals.size()))
@@ -252,6 +262,9 @@ void ModelLoader::StoreFace(std::queue<std::string>& faceSegments, Model & desti
 				destinationModel.m_normalValues.push_back(normal.x);
 				destinationModel.m_normalValues.push_back(normal.y);
 				destinationModel.m_normalValues.push_back(normal.z);
+				currentFaceCollection.m_normalValues.push_back(normal.x);
+				currentFaceCollection.m_normalValues.push_back(normal.y);
+				currentFaceCollection.m_normalValues.push_back(normal.z);
 			}
 		}
 		faceSegments.pop();
@@ -307,7 +320,8 @@ std::unique_ptr<Model> ModelLoader::LoadModelFromOBJFile(const std::string& mode
 
 	std::ifstream modelFileStream(modelFilePath, std::ios::in);
 	int numFaces = 0;
-	
+	std::string currentMtlName;
+
 	if (!modelFileStream.good())
 	{
 		std::cout << "ERROR: Failed to open file at path '" << modelFilePath << "'" << std::endl;
@@ -349,6 +363,12 @@ std::unique_ptr<Model> ModelLoader::LoadModelFromOBJFile(const std::string& mode
 					//}
 				}
 				break;*/
+				case Tag::Material:
+				{
+					currentMtlName = lineSegments.front();
+					loadedModel.m_mtlToFaces.emplace(currentMtlName, FaceCollection());
+				}
+				break;
 
 				case Tag::Vertex:
 				{
@@ -400,7 +420,7 @@ std::unique_ptr<Model> ModelLoader::LoadModelFromOBJFile(const std::string& mode
 					try
 					{
 						++numFaces;
-						StoreFace(lineSegments, loadedModel);
+						StoreFace(lineSegments, loadedModel, currentMtlName);
 					}
 					catch (std::exception e)
 					{
@@ -459,6 +479,10 @@ std::unique_ptr<Model> ModelLoader::LoadModelFromOBJFile(const std::string& mode
 		std::cout << "Number of vertices: " << loadedModel.GetNumberOfVertices() << std::endl;
 		std::cout << "ModelLoader::LoadModelFromOBJFile - Model loaded complete." << std::endl << std::endl;
 
+		for (const auto& pair : loadedModel.m_mtlToFaces)
+		{
+			std::cout << "Material: " << pair.first << ", Number Of Faces: " << pair.second.m_positionValues.size() / 9 << std::endl;
+		}
 		return loadedModelPtr;
 	}
 	

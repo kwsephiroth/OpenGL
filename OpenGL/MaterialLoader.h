@@ -12,11 +12,9 @@ class MaterialLoader
 {
 private:
 	MaterialLoader() = default;
-	static void SplitLineByDelimeter(const std::string& line, char delimiter, std::queue < std::string>& destination);
+	static void SplitLineByDelimeter(const std::string& line, char delimiter, std::queue < std::string>& destination);//TODO: Move this function to a common, shared location
 	
 public:
-	~MaterialLoader() = default;
-
 	using MaterialsMap = std::unordered_map<std::string, Material>;
 
 	static std::unique_ptr<MaterialsMap> LoadMaterialFromMtlFile(const std::string& mtlFilePath);
