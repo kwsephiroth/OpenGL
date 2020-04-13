@@ -22,9 +22,26 @@ unsigned int renderingProgram;
 int width, height;
 float aspect;
 glm::mat4 pMat;
+bool keys[1024];
 
 unsigned int positionAttribLocation;
 unsigned int textureAttribLocation;
+
+// Is called whenever a key is pressed/released via GLFW
+void key_callback(GLFWwindow * window, int key, int scancode, int action, int mode)
+{
+	//cout << key << endl;
+	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+		glfwSetWindowShouldClose(window, GL_TRUE);
+
+	if (key >= 0 && key < 1024)
+	{
+		if (action == GLFW_PRESS)
+			keys[key] = true;
+		else if (action == GLFW_RELEASE)
+			keys[key] = false;
+	}
+}
 
 static void GLClearError()
 {
@@ -97,7 +114,8 @@ int main(void)
 	if (errorCode != GLEW_OK)
 		std::cout << "glewInit() failed with error code (" << errorCode << ")" << std::endl;
 
-
+	//Set up callback functions to capture and respond to events
+	glfwSetKeyCallback(window, key_callback);
 	glfwSetWindowSizeCallback(window, window_size_callback);
 	//std::cout << "OpenGL Version: " << glGetString(GL_VERSION) << std::endl;
 	
@@ -134,6 +152,9 @@ int main(void)
 	
 	glm::mat4 tempModelMatrix = glm::mat4(1.0f);//Initialize to identity matrix
 
+	float yRotAngle = 0.0f;
+	float xRotAngle = 0.0f;
+
 	/* Loop until the user closes the window */
 	while (!glfwWindowShouldClose(window))
 	{
@@ -152,7 +173,32 @@ int main(void)
 		//r.SetModelMatrix("shuttle", std::move(tempModelMatrix));
 
 		//r.GetModelMatrix("bat", tempModelMatrix);
+		//tempModelMatrix = glm::translate(tempModelMatrix, glm::vec3(0.0f, -0.8f, 0.0f));
+
+		if (keys[GLFW_KEY_W]) //UP Movement
+		{
+			xRotAngle++;
+		}
+
+		if (keys[GLFW_KEY_S])//DOWN/Crouch Movement
+		{
+			xRotAngle--;
+		}
+
+		if (keys[GLFW_KEY_A])//LEFT movement
+		{
+			yRotAngle++;
+			
+		}
+
+		if (keys[GLFW_KEY_D])//RIGHT movement
+		{
+			yRotAngle--;
+		}
+
+		tempModelMatrix = glm::rotate(tempModelMatrix, toRadians(xRotAngle), glm::vec3(1.0f, 0.0f, 0.0f));
 		tempModelMatrix = glm::translate(tempModelMatrix, glm::vec3(0.0f, -0.8f, 0.0f));
+		tempModelMatrix = glm::rotate(tempModelMatrix, toRadians(yRotAngle), glm::vec3(0.0f, 1.0f, 0.0f));
 		r.SetModelMatrix("bat", std::move(tempModelMatrix));
 
 		r.SetAspectRatio(aspect);

@@ -31,5 +31,6 @@ void main(void)
 	//color = texture(s,tc);
 	//color = my_color;
 
-	color = (globalAmbient + material.diffuse + material.specular);
+	//color = /*(globalAmbient +*/ (material.diffuse + material.specular);
+	color = material.diffuse;
 }
