@@ -239,9 +239,9 @@ void ModelLoader::StoreFace(std::queue<std::string>& faceSegments, Model & desti
 			if (positionIndex > -1 && positionIndex < (int)(destinationModel.m_positions.size()))
 			{
 				const auto & position = destinationModel.m_positions[positionIndex];
-				destinationModel.m_positionValues.push_back(position.x);
-				destinationModel.m_positionValues.push_back(position.y);
-				destinationModel.m_positionValues.push_back(position.z);
+				//destinationModel.m_positionValues.push_back(position.x);
+				//destinationModel.m_positionValues.push_back(position.y);
+				//destinationModel.m_positionValues.push_back(position.z);
 				currentFaceCollection.m_positionValues.push_back(position.x);
 				currentFaceCollection.m_positionValues.push_back(position.y);
 				currentFaceCollection.m_positionValues.push_back(position.z);
@@ -250,8 +250,8 @@ void ModelLoader::StoreFace(std::queue<std::string>& faceSegments, Model & desti
 			if (textureCoorIndex > -1 && textureCoorIndex < (int)(destinationModel.m_textureCoordinates.size()))
 			{
 				const auto & textCoordinate = destinationModel.m_textureCoordinates[textureCoorIndex];
-				destinationModel.m_textureCoorValues.push_back(textCoordinate.s);
-				destinationModel.m_textureCoorValues.push_back(textCoordinate.t);
+				//destinationModel.m_textureCoorValues.push_back(textCoordinate.s);
+				//destinationModel.m_textureCoorValues.push_back(textCoordinate.t);
 				currentFaceCollection.m_textureCoorValues.push_back(textCoordinate.s);
 				currentFaceCollection.m_textureCoorValues.push_back(textCoordinate.t);
 			}
@@ -259,9 +259,9 @@ void ModelLoader::StoreFace(std::queue<std::string>& faceSegments, Model & desti
 			if (normalIndex > -1 && normalIndex < (int)(destinationModel.m_normals.size()))
 			{
 				const auto & normal = destinationModel.m_normals[normalIndex];
-				destinationModel.m_normalValues.push_back(normal.x);
-				destinationModel.m_normalValues.push_back(normal.y);
-				destinationModel.m_normalValues.push_back(normal.z);
+				//destinationModel.m_normalValues.push_back(normal.x);
+				//destinationModel.m_normalValues.push_back(normal.y);
+				//destinationModel.m_normalValues.push_back(normal.z);
 				currentFaceCollection.m_normalValues.push_back(normal.x);
 				currentFaceCollection.m_normalValues.push_back(normal.y);
 				currentFaceCollection.m_normalValues.push_back(normal.z);

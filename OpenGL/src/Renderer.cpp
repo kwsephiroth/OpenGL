@@ -28,9 +28,6 @@ void Renderer::RenderModel(const std::string & modelName)
 	{
 		using namespace std;
 		auto& m = itr->second;
-		glClear(GL_DEPTH_BUFFER_BIT);
-		glClearColor(1.0, 1.0, 1.0, 1.0);
-		glClear(GL_COLOR_BUFFER_BIT);
 
 		glUseProgram(m_shaderProgramId);
 
@@ -136,37 +133,15 @@ const glm::vec3 Renderer::GetModelInitialWorldPosition(const std::string & model
 }
 
 void Renderer::RenderModels()
-{
-	using namespace std;
-	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-	glClearColor(0.0, 0.0, 0.0, 1.0);
-	//glClear(GL_COLOR_BUFFER_BIT);
-
-	glUseProgram(m_shaderProgramId);
-
-	mvLoc = glGetUniformLocation(m_shaderProgramId, "mv_matrix");
-	projLoc = glGetUniformLocation(m_shaderProgramId, "proj_matrix");
-
-	vMat = glm::translate(glm::mat4(1.0f), glm::vec3(-cameraX, -cameraY, -cameraZ));
-	
-	pMat = glm::perspective(1.0472f, m_aspectRatio, 0.1f, 1000.0f);
-	glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(pMat));
-	
+{	
 	glBindVertexArray(m_vao);
 	for (auto& m : m_models)
 	{
 		if (!m.second->IsInitialized())
 			continue;
 
-		mvMat = vMat * m.second->GetModelMatrix();	
-		glUniformMatrix4fv(mvLoc, 1, GL_FALSE, glm::value_ptr(mvMat));
-		m.second->Bind(m_positionAttribLocation, m_textureCoordAttribLocation);
-		glEnable(GL_DEPTH_TEST);
-		glDepthFunc(GL_LEQUAL);
-		glDrawArrays(GL_TRIANGLES, 0, m.second->GetNumberOfVertices());
-		m.second->Unbind();	
+		RenderModel(m.first);
 	}
-	glBindVertexArray(0);
 }
 
 void Renderer::AddModel(ModelPtr model)

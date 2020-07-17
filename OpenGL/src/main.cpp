@@ -159,7 +159,10 @@ int main(void)
 	while (!glfwWindowShouldClose(window))
 	{
 		/* Render here */
-		GLCall(glClear(GL_COLOR_BUFFER_BIT));
+		//GLCall(glClear(GL_COLOR_BUFFER_BIT));
+		glClear(GL_DEPTH_BUFFER_BIT);
+		glClearColor(1.0, 1.0, 1.0, 1.0);
+		glClear(GL_COLOR_BUFFER_BIT);
 		//draw(window, glfwGetTime());
 		
 		//TODO: Apply any transforms to a model here
@@ -178,27 +181,54 @@ int main(void)
 		if (keys[GLFW_KEY_W]) //UP Movement
 		{
 			xRotAngle++;
+			if (xRotAngle >= 360)
+				xRotAngle = 0;
 		}
 
 		if (keys[GLFW_KEY_S])//DOWN/Crouch Movement
 		{
 			xRotAngle--;
+			if (xRotAngle <= -360)
+				xRotAngle = 0;
 		}
 
 		if (keys[GLFW_KEY_A])//LEFT movement
 		{
 			yRotAngle++;
+			if (yRotAngle >= 360)
+				yRotAngle = 0;
 			
 		}
 
 		if (keys[GLFW_KEY_D])//RIGHT movement
 		{
 			yRotAngle--;
+			if (yRotAngle <= -360)
+				yRotAngle = 0;
 		}
 
+		//Cumulate transformations - applied right to left
+		tempModelMatrix = glm::scale(tempModelMatrix, glm::vec3(.3f, .3f, .3f));//Applied last
 		tempModelMatrix = glm::rotate(tempModelMatrix, toRadians(xRotAngle), glm::vec3(1.0f, 0.0f, 0.0f));
-		tempModelMatrix = glm::translate(tempModelMatrix, glm::vec3(0.0f, -0.8f, 0.0f));
+		tempModelMatrix = glm::translate(tempModelMatrix, glm::vec3(-0.8f, -0.8f, 0.0f));
+		tempModelMatrix = glm::rotate(tempModelMatrix, toRadians(yRotAngle), glm::vec3(0.0f, 1.0f, 0.0f));//Applied first
+		
+		r.SetModelMatrix("bat", std::move(tempModelMatrix));
+
+		r.SetAspectRatio(aspect);
+		//Now render model(s)
+		//r.RenderModels();
+		//r.RenderModel("shuttle");
+		r.RenderModel("bat");
+
+		//Cumulate transformations - applied right to left
+	
+		tempModelMatrix = glm::mat4(1.0f);//Initialize to identity matrix
+		tempModelMatrix = glm::scale(tempModelMatrix, glm::vec3(.3f, .3f, .3f));
+		tempModelMatrix = glm::rotate(tempModelMatrix, toRadians(xRotAngle), glm::vec3(1.0f, 0.0f, 0.0f));
+		tempModelMatrix = glm::translate(tempModelMatrix, glm::vec3(0.8f, -0.8f, 0.0f));
 		tempModelMatrix = glm::rotate(tempModelMatrix, toRadians(yRotAngle), glm::vec3(0.0f, 1.0f, 0.0f));
+
 		r.SetModelMatrix("bat", std::move(tempModelMatrix));
 
 		r.SetAspectRatio(aspect);
