@@ -90,8 +90,6 @@ void Renderer::RenderModel(const std::string & modelName)
 			glBindBuffer(GL_ARRAY_BUFFER, vbos.m_positionsVBO);
 			glVertexAttribPointer(m_positionAttribLocation, 3, GL_FLOAT, GL_FALSE, 0, 0);
 			glEnableVertexAttribArray(m_positionAttribLocation);
-			glEnable(GL_DEPTH_TEST);
-			glDepthFunc(GL_LEQUAL);
 			glDrawArrays(GL_TRIANGLES, 0, vbos.m_numberOfVertices);
 			glBindBuffer(GL_ARRAY_BUFFER, 0);
 			glActiveTexture(0);

@@ -10,6 +10,7 @@
 #include "../MaterialLoader.h"
 #include "../Renderer.h"
 #include <iostream>
+#include <time.h>
 
 
 #define ASSERT(x) if (!(x)) __debugbreak();
@@ -126,8 +127,10 @@ int main(void)
 	{
 		//Attempt to generate model object
 		//auto model = ModelLoader::LoadModelFromOBJFile("shuttle", "res/models/shuttle.obj", "res/textures/spstob_1.jpg");
-		auto mtlMapPtr = MaterialLoader::LoadMaterialFromMtlFile("res/models/bat.mtl");
-		auto model2 = ModelLoader::LoadModelFromOBJFile("bat", "res/models/bat.obj", "");
+		auto batMtlMapPtr = MaterialLoader::LoadMaterialFromMtlFile("res/models/bat.mtl");
+		auto batModelPtr = ModelLoader::LoadModelFromOBJFile("bat", "res/models/bat.obj", "");
+		auto mangoTreeMtlMapPtr = MaterialLoader::LoadMaterialFromMtlFile("res/models/mango_tree.mtl");
+		auto mangoTreeModelPtr = ModelLoader::LoadModelFromOBJFile("mango_tree", "res/models/mango_tree.obj", "");
 		//if (model)
 		//{
 		//	r.AddModel(std::move(model));
@@ -137,10 +140,20 @@ int main(void)
 		//	return -1;
 		//}
 
-		if (model2)
+		if (batModelPtr)
 		{
-			r.AddModel(std::move(model2));
-			r.SetMaterialsMap(std::move(mtlMapPtr));
+			r.AddModel(std::move(batModelPtr));
+			r.CopyFromMaterialsMap(std::move(batMtlMapPtr));
+		}
+		else
+		{
+			return -1;
+		}
+		
+		if (mangoTreeModelPtr)
+		{
+			r.AddModel(std::move(mangoTreeModelPtr));
+			r.CopyFromMaterialsMap(std::move(mangoTreeMtlMapPtr));
 		}
 		else
 		{
@@ -155,14 +168,20 @@ int main(void)
 	float yRotAngle = 0.0f;
 	float xRotAngle = 0.0f;
 
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
+	auto currentTime = glfwGetTime();
+
 	/* Loop until the user closes the window */
 	while (!glfwWindowShouldClose(window))
 	{
 		/* Render here */
 		//GLCall(glClear(GL_COLOR_BUFFER_BIT));
 		glClear(GL_DEPTH_BUFFER_BIT);
-		glClearColor(1.0, 1.0, 1.0, 1.0);
+		glClearColor(135.0f / 255.0f, 206.0f / 255.0f, 235.0f / 255.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
+		//glEnable(GL_CULL_FACE);
+		//glCullFace(GL_FRONT);
 		//draw(window, glfwGetTime());
 		
 		//TODO: Apply any transforms to a model here
@@ -207,22 +226,16 @@ int main(void)
 				yRotAngle = 0;
 		}
 
-		//Cumulate transformations - applied right to left
+		//bat 1
 		tempModelMatrix = glm::scale(tempModelMatrix, glm::vec3(.3f, .3f, .3f));//Applied last
 		tempModelMatrix = glm::rotate(tempModelMatrix, toRadians(xRotAngle), glm::vec3(1.0f, 0.0f, 0.0f));
 		tempModelMatrix = glm::translate(tempModelMatrix, glm::vec3(-0.8f, -0.8f, 0.0f));
 		tempModelMatrix = glm::rotate(tempModelMatrix, toRadians(yRotAngle), glm::vec3(0.0f, 1.0f, 0.0f));//Applied first
-		
+	
 		r.SetModelMatrix("bat", std::move(tempModelMatrix));
-
-		r.SetAspectRatio(aspect);
-		//Now render model(s)
-		//r.RenderModels();
-		//r.RenderModel("shuttle");
 		r.RenderModel("bat");
 
-		//Cumulate transformations - applied right to left
-	
+		//bat 2
 		tempModelMatrix = glm::mat4(1.0f);//Initialize to identity matrix
 		tempModelMatrix = glm::scale(tempModelMatrix, glm::vec3(.3f, .3f, .3f));
 		tempModelMatrix = glm::rotate(tempModelMatrix, toRadians(xRotAngle), glm::vec3(1.0f, 0.0f, 0.0f));
@@ -230,12 +243,23 @@ int main(void)
 		tempModelMatrix = glm::rotate(tempModelMatrix, toRadians(yRotAngle), glm::vec3(0.0f, 1.0f, 0.0f));
 
 		r.SetModelMatrix("bat", std::move(tempModelMatrix));
+		r.RenderModel("bat");
+
+
+		//Mango tree
+		for (size_t i = 0; i < 6; ++i)
+		{
+			auto tf = (float)currentTime + i;
+			tempModelMatrix = glm::mat4(1.0f);//Initialize to identity matrix
+			tempModelMatrix = glm::scale(tempModelMatrix, glm::vec3(.09f, .09f, .09f));
+			tempModelMatrix = glm::translate(tempModelMatrix, glm::vec3(sin(tf)*15.0f, -8.0f, sin(tf)*-5.0f));
+			tempModelMatrix = glm::rotate(tempModelMatrix, toRadians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+
+			r.SetModelMatrix("mango_tree", std::move(tempModelMatrix));
+			r.RenderModel("mango_tree");
+		}
 
 		r.SetAspectRatio(aspect);
-		//Now render model(s)
-		//r.RenderModels();
-		//r.RenderModel("shuttle");
-		r.RenderModel("bat");
 
 		/* Swap front and back buffers */
 		glfwSwapBuffers(window);

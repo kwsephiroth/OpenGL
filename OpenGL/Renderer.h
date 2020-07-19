@@ -16,7 +16,7 @@ private:
 	//std::vector<ModelPtr> m_models;
 	std::unordered_map<std::string, ModelPtr> m_models;//TODO: Create objectName to Model object map
 	using MaterialsMap = std::unordered_map<std::string, Material>;
-	std::unique_ptr<MaterialsMap> m_materials;
+	std::unique_ptr<MaterialsMap> m_materials = std::make_unique<MaterialsMap>();
 	unsigned int m_positionAttribLocation;
 	unsigned int m_textureCoordAttribLocation;
 	unsigned int m_normalAttribLocation;
@@ -53,6 +53,14 @@ public:
 	void SetAspectRatio(float aspectRatio) { m_aspectRatio = aspectRatio; }
 	void SetModelMatrix(const std::string& modelName, glm::mat4&& modelMatrix);
 	void SetMaterialsMap(std::unique_ptr<MaterialsMap> mtlMapPtr) { m_materials = std::move(mtlMapPtr); }
+	void CopyFromMaterialsMap(std::unique_ptr<MaterialsMap> mtlMapPtr)
+	{
+		m_materials->size();
+		for (auto itr = mtlMapPtr->begin(); itr != mtlMapPtr->end(); ++itr)
+		{
+			m_materials->emplace(itr->first, itr->second);
+		}
+	}
 	void GetModelMatrix(const std::string& modelName, glm::mat4& returnValue);
 	const glm::vec3 GetModelInitialWorldPosition(const std::string& modelName);
 };
