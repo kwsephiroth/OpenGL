@@ -55,10 +55,9 @@ public:
 	void SetMaterialsMap(std::unique_ptr<MaterialsMap> mtlMapPtr) { m_materials = std::move(mtlMapPtr); }
 	void CopyFromMaterialsMap(std::unique_ptr<MaterialsMap> mtlMapPtr)
 	{
-		m_materials->size();
 		for (auto itr = mtlMapPtr->begin(); itr != mtlMapPtr->end(); ++itr)
 		{
-			m_materials->emplace(itr->first, itr->second);
+			m_materials->emplace(itr->first, std::move(itr->second));
 		}
 	}
 	void GetModelMatrix(const std::string& modelName, glm::mat4& returnValue);

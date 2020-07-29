@@ -11,7 +11,8 @@
 #include "../Renderer.h"
 #include <iostream>
 #include <time.h>
-
+#include <cstdlib>
+#include <stdlib.h>
 
 #define ASSERT(x) if (!(x)) __debugbreak();
 #define GLCall(x) GLClearError();\
@@ -123,7 +124,7 @@ int main(void)
 	//setup_vertices();
 	init(window);
 
-	Renderer r(renderingProgram, positionAttribLocation, textureAttribLocation);//A single VAO is generated in this constructor
+	Renderer renderer(renderingProgram, positionAttribLocation, textureAttribLocation);//A single VAO is generated in this constructor
 	{
 		//Attempt to generate model object
 		//auto model = ModelLoader::LoadModelFromOBJFile("shuttle", "res/models/shuttle.obj", "res/textures/spstob_1.jpg");
@@ -131,34 +132,16 @@ int main(void)
 		auto batModelPtr = ModelLoader::LoadModelFromOBJFile("bat", "res/models/bat.obj", "");
 		auto mangoTreeMtlMapPtr = MaterialLoader::LoadMaterialFromMtlFile("res/models/mango_tree.mtl");
 		auto mangoTreeModelPtr = ModelLoader::LoadModelFromOBJFile("mango_tree", "res/models/mango_tree.obj", "");
-		//if (model)
-		//{
-		//	r.AddModel(std::move(model));
-		//}
-		//else
-		//{
-		//	return -1;
-		//}
 
-		if (batModelPtr)
-		{
-			r.AddModel(std::move(batModelPtr));
-			r.CopyFromMaterialsMap(std::move(batMtlMapPtr));
-		}
-		else
+		if (!batModelPtr || !mangoTreeModelPtr)
 		{
 			return -1;
 		}
 		
-		if (mangoTreeModelPtr)
-		{
-			r.AddModel(std::move(mangoTreeModelPtr));
-			r.CopyFromMaterialsMap(std::move(mangoTreeMtlMapPtr));
-		}
-		else
-		{
-			return -1;
-		}
+		renderer.AddModel(std::move(batModelPtr));
+		renderer.AddModel(std::move(mangoTreeModelPtr));
+		renderer.CopyFromMaterialsMap(std::move(batMtlMapPtr));
+		renderer.CopyFromMaterialsMap(std::move(mangoTreeMtlMapPtr));
 	}
 
     auto toRadians = [](float degrees) {return (degrees * 2.0f * 3.14159f) / 360.0f; };
@@ -170,50 +153,60 @@ int main(void)
 
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
-	auto currentTime = glfwGetTime();
+	
+	float speed = 120.0f;//frames per second
+	double lastTime = 0;
+	double currentTime = 0;
+	float deltaTime = 0;
+	/* initialize random seed: */
+	//srand(time(NULL));
+	int random_number = (rand() % 100);
+	const int GROUND_LEVEL = -8.0f;
+
+	const int TREE_COUNT = 10000;
+	std::vector<int> tree_rands;
+	for (size_t i = 0; i < TREE_COUNT; ++i)
+	{
+		tree_rands.push_back((rand() % 100));
+	}
 
 	/* Loop until the user closes the window */
 	while (!glfwWindowShouldClose(window))
 	{
 		/* Render here */
-		//GLCall(glClear(GL_COLOR_BUFFER_BIT));
 		glClear(GL_DEPTH_BUFFER_BIT);
-		glClearColor(135.0f / 255.0f, 206.0f / 255.0f, 235.0f / 255.0f, 1.0f);
+
+		float r = 135.0f / 255.0f;
+		float g = 206.0f / 255.0f;
+		float b = 235.0f / 255.0f;
+		float a = 1.0f;
+		glClearColor(r, g, b, a);
 		glClear(GL_COLOR_BUFFER_BIT);
 		//glEnable(GL_CULL_FACE);
 		//glCullFace(GL_FRONT);
 		//draw(window, glfwGetTime());
-		
-		//TODO: Apply any transforms to a model here
-		//r.GetModelMatrix("shuttle", tempModelMatrix);
-		//tempModelMatrix = glm::translate(tempModelMatrix, r.GetModelInitialWorldPosition("shuttle"));
-		//tempModelMatrix = glm::rotate(tempModelMatrix, toRadians(135.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		//tempModelMatrix = glm::rotate(tempModelMatrix, toRadians(35.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-		
-		//tempModelMatrix = glm::rotate(tempModelMatrix, toRadians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		//tempModelMatrix = glm::rotate(tempModelMatrix, toRadians(45.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-		//r.SetModelMatrix("shuttle", std::move(tempModelMatrix));
 
-		//r.GetModelMatrix("bat", tempModelMatrix);
-		//tempModelMatrix = glm::translate(tempModelMatrix, glm::vec3(0.0f, -0.8f, 0.0f));
+		lastTime = currentTime;
+		currentTime = glfwGetTime();
+		deltaTime = float(currentTime - lastTime);
 
 		if (keys[GLFW_KEY_W]) //UP Movement
 		{
-			xRotAngle++;
+			xRotAngle += deltaTime * speed;
 			if (xRotAngle >= 360)
 				xRotAngle = 0;
 		}
 
 		if (keys[GLFW_KEY_S])//DOWN/Crouch Movement
 		{
-			xRotAngle--;
+			xRotAngle -= deltaTime * speed;;
 			if (xRotAngle <= -360)
 				xRotAngle = 0;
 		}
 
 		if (keys[GLFW_KEY_A])//LEFT movement
 		{
-			yRotAngle++;
+			yRotAngle += deltaTime * speed;;
 			if (yRotAngle >= 360)
 				yRotAngle = 0;
 			
@@ -221,45 +214,47 @@ int main(void)
 
 		if (keys[GLFW_KEY_D])//RIGHT movement
 		{
-			yRotAngle--;
+			yRotAngle -= deltaTime * speed;;
 			if (yRotAngle <= -360)
 				yRotAngle = 0;
 		}
 
 		//bat 1
+		//tempModelMatrix = glm::translate(tempModelMatrix, glm::vec3(-0.8f, -0.8f, 0.0f));
 		tempModelMatrix = glm::scale(tempModelMatrix, glm::vec3(.3f, .3f, .3f));//Applied last
-		tempModelMatrix = glm::rotate(tempModelMatrix, toRadians(xRotAngle), glm::vec3(1.0f, 0.0f, 0.0f));
-		tempModelMatrix = glm::translate(tempModelMatrix, glm::vec3(-0.8f, -0.8f, 0.0f));
+		tempModelMatrix = glm::rotate(tempModelMatrix, toRadians(xRotAngle), glm::vec3(1.0f, 0.0f, 0.0f));		
 		tempModelMatrix = glm::rotate(tempModelMatrix, toRadians(yRotAngle), glm::vec3(0.0f, 1.0f, 0.0f));//Applied first
+
 	
-		r.SetModelMatrix("bat", std::move(tempModelMatrix));
-		r.RenderModel("bat");
+		renderer.SetModelMatrix("bat", std::move(tempModelMatrix));
+		renderer.RenderModel("bat");
 
 		//bat 2
 		tempModelMatrix = glm::mat4(1.0f);//Initialize to identity matrix
+		//tempModelMatrix = glm::translate(tempModelMatrix, glm::vec3(0.8f, -0.8f, 0.0f));
+		tempModelMatrix = glm::translate(tempModelMatrix, glm::vec3(-0.3f, 0.3f, 0.0f));
 		tempModelMatrix = glm::scale(tempModelMatrix, glm::vec3(.3f, .3f, .3f));
 		tempModelMatrix = glm::rotate(tempModelMatrix, toRadians(xRotAngle), glm::vec3(1.0f, 0.0f, 0.0f));
-		tempModelMatrix = glm::translate(tempModelMatrix, glm::vec3(0.8f, -0.8f, 0.0f));
 		tempModelMatrix = glm::rotate(tempModelMatrix, toRadians(yRotAngle), glm::vec3(0.0f, 1.0f, 0.0f));
 
-		r.SetModelMatrix("bat", std::move(tempModelMatrix));
-		r.RenderModel("bat");
+		renderer.SetModelMatrix("bat", std::move(tempModelMatrix));
+		renderer.RenderModel("bat");
 
 
 		//Mango tree
-		for (size_t i = 0; i < 6; ++i)
+		for (size_t i = 0; i < TREE_COUNT; ++i)
 		{
-			auto tf = (float)currentTime + i;
+			auto tf = tree_rands[i] + i;
 			tempModelMatrix = glm::mat4(1.0f);//Initialize to identity matrix
 			tempModelMatrix = glm::scale(tempModelMatrix, glm::vec3(.09f, .09f, .09f));
-			tempModelMatrix = glm::translate(tempModelMatrix, glm::vec3(sin(tf)*15.0f, -8.0f, sin(tf)*-5.0f));
+			tempModelMatrix = glm::translate(tempModelMatrix, glm::vec3(cos(tf) * tree_rands[i] * i/*15.0f*/, GROUND_LEVEL, sin(tf) * tree_rands[i] * i));//-5.0f));
 			tempModelMatrix = glm::rotate(tempModelMatrix, toRadians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
-			r.SetModelMatrix("mango_tree", std::move(tempModelMatrix));
-			r.RenderModel("mango_tree");
+			renderer.SetModelMatrix("mango_tree", std::move(tempModelMatrix));
+			renderer.RenderModel("mango_tree");
 		}
 
-		r.SetAspectRatio(aspect);
+		renderer.SetAspectRatio(aspect);
 
 		/* Swap front and back buffers */
 		glfwSwapBuffers(window);
@@ -270,7 +265,7 @@ int main(void)
 		//reset temp matrix to identity matrix per iteration
 		tempModelMatrix = glm::mat4(1.0f);
 	}
-	
+	tree_rands.clear();
 	glfwTerminate();
 	return 0;
 }
