@@ -3,6 +3,8 @@
 #include <glm/vec3.hpp> // glm::vec3
 #include <glm/vec4.hpp> // glm::vec4
 #include <glm/mat4x4.hpp> // glm::mat4
+#include <glm/gtc/quaternion.hpp>
+#include <glm/gtx/quaternion.hpp>
 #include <glm/gtc/matrix_transform.hpp> // glm::translate, glm::rotate, glm::scale, glm::perspective
 #include <SOIL2/soil2.h>
 #include "../Shader.h"
@@ -13,6 +15,7 @@
 #include <time.h>
 #include <cstdlib>
 #include <stdlib.h>
+#include <thread>
 
 #define ASSERT(x) if (!(x)) __debugbreak();
 #define GLCall(x) GLClearError();\
@@ -155,9 +158,7 @@ int main(void)
 	glDepthFunc(GL_LESS);
 	
 	float speed = 120.0f;//frames per second
-	double lastTime = 0;
-	double currentTime = 0;
-	float deltaTime = 0;
+	int fps = 0;
 	/* initialize random seed: */
 	//srand(time(NULL));
 	int random_number = (rand() % 100);
@@ -172,7 +173,15 @@ int main(void)
 
 	/* Loop until the user closes the window */
 	while (!glfwWindowShouldClose(window))
-	{
+	{	
+
+		// glfwGetTime is called only once, the first time this function is called
+		static double lastTime = glfwGetTime();
+
+		// Compute time difference between current and last frame
+		double currentTime = glfwGetTime();
+		float deltaTime = float(currentTime - lastTime);
+
 		/* Render here */
 		glClear(GL_DEPTH_BUFFER_BIT);
 
@@ -186,59 +195,51 @@ int main(void)
 		//glCullFace(GL_FRONT);
 		//draw(window, glfwGetTime());
 
-		lastTime = currentTime;
-		currentTime = glfwGetTime();
-		deltaTime = float(currentTime - lastTime);
-
-		if (keys[GLFW_KEY_W]) //UP Movement
+		if (keys[GLFW_KEY_S]) //UP Movement
 		{
-			xRotAngle += deltaTime * speed;
-			if (xRotAngle >= 360)
-				xRotAngle = 0;
+			xRotAngle += (deltaTime * speed);
 		}
 
-		if (keys[GLFW_KEY_S])//DOWN/Crouch Movement
+		if (keys[GLFW_KEY_W])//DOWN/Crouch Movement
 		{
-			xRotAngle -= deltaTime * speed;;
-			if (xRotAngle <= -360)
-				xRotAngle = 0;
+			xRotAngle -= (deltaTime * speed);
 		}
 
-		if (keys[GLFW_KEY_A])//LEFT movement
+		if (keys[GLFW_KEY_D])//LEFT movement
 		{
-			yRotAngle += deltaTime * speed;;
-			if (yRotAngle >= 360)
-				yRotAngle = 0;
-			
+			yRotAngle += (deltaTime * speed);
 		}
 
-		if (keys[GLFW_KEY_D])//RIGHT movement
+		if (keys[GLFW_KEY_A])//RIGHT movement
 		{
-			yRotAngle -= deltaTime * speed;;
-			if (yRotAngle <= -360)
-				yRotAngle = 0;
+			yRotAngle -= (deltaTime * speed);
 		}
 
 		//bat 1
-		//tempModelMatrix = glm::translate(tempModelMatrix, glm::vec3(-0.8f, -0.8f, 0.0f));
-		tempModelMatrix = glm::scale(tempModelMatrix, glm::vec3(.3f, .3f, .3f));//Applied last
-		tempModelMatrix = glm::rotate(tempModelMatrix, toRadians(xRotAngle), glm::vec3(1.0f, 0.0f, 0.0f));		
-		tempModelMatrix = glm::rotate(tempModelMatrix, toRadians(yRotAngle), glm::vec3(0.0f, 1.0f, 0.0f));//Applied first
+		glm::vec3 euler_angles(glm::radians(xRotAngle), glm::radians(yRotAngle), 0);
+		//glm::vec3 euler_angles(0, (float)glfwGetTime() * speed, 0);
+		glm::quat my_quat = glm::quat(euler_angles);
+		//glm::quat my_quat2 = glm::angleAxis(glm::radians(xRotAngle), glm::vec3(1.0f, 0.0f, 0.0f));
+		//tempModelMatrix = glm::translate(tempModelMatrix, glm::vec3(-0.8f, -0.8f, 0.0f));	
+		tempModelMatrix = glm::toMat4(my_quat);
+		tempModelMatrix = glm::scale(tempModelMatrix, glm::vec3(.3f, .3f, .3f));
+		//tempModelMatrix = glm::rotate(tempModelMatrix, toRadians(xRotAngle), glm::vec3(1.0f, 0.0f, 0.0f));		
+		//tempModelMatrix = glm::rotate(tempModelMatrix, toRadians(yRotAngle), glm::vec3(0.0f, 1.0f, 0.0f));
 
 	
 		renderer.SetModelMatrix("bat", std::move(tempModelMatrix));
 		renderer.RenderModel("bat");
 
 		//bat 2
-		tempModelMatrix = glm::mat4(1.0f);//Initialize to identity matrix
-		//tempModelMatrix = glm::translate(tempModelMatrix, glm::vec3(0.8f, -0.8f, 0.0f));
-		tempModelMatrix = glm::translate(tempModelMatrix, glm::vec3(-0.3f, 0.3f, 0.0f));
-		tempModelMatrix = glm::scale(tempModelMatrix, glm::vec3(.3f, .3f, .3f));
-		tempModelMatrix = glm::rotate(tempModelMatrix, toRadians(xRotAngle), glm::vec3(1.0f, 0.0f, 0.0f));
-		tempModelMatrix = glm::rotate(tempModelMatrix, toRadians(yRotAngle), glm::vec3(0.0f, 1.0f, 0.0f));
+		//tempModelMatrix = glm::mat4(1.0f);//Initialize to identity matrix
+		////tempModelMatrix = glm::translate(tempModelMatrix, glm::vec3(0.8f, -0.8f, 0.0f));
+		//tempModelMatrix = glm::translate(tempModelMatrix, glm::vec3(-0.3f, 0.3f, 0.0f));
+		//tempModelMatrix = glm::scale(tempModelMatrix, glm::vec3(.3f, .3f, .3f));
+		//tempModelMatrix = glm::rotate(tempModelMatrix, toRadians(xRotAngle), glm::vec3(1.0f, 0.0f, 0.0f));
+		//tempModelMatrix = glm::rotate(tempModelMatrix, toRadians(yRotAngle), glm::vec3(0.0f, 1.0f, 0.0f));
 
-		renderer.SetModelMatrix("bat", std::move(tempModelMatrix));
-		renderer.RenderModel("bat");
+		//renderer.SetModelMatrix("bat", std::move(tempModelMatrix));
+		//renderer.RenderModel("bat");
 
 
 		//Mango tree
@@ -259,11 +260,14 @@ int main(void)
 		/* Swap front and back buffers */
 		glfwSwapBuffers(window);
 
+		lastTime = currentTime;
+
 		/* Poll for and process events */
 		glfwPollEvents();
 
 		//reset temp matrix to identity matrix per iteration
 		tempModelMatrix = glm::mat4(1.0f);
+
 	}
 	tree_rands.clear();
 	glfwTerminate();
