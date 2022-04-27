@@ -472,11 +472,10 @@ std::unique_ptr<Model> ModelLoader::LoadModelFromOBJFile(const std::string& mode
 		loadedModel.InitializeModelMatrix();
 
 		std::cout << "Model Name: " << loadedModel.m_name << std::endl;
-		std::cout << "Number of positions: " << loadedModel.m_positions.size() << std::endl;
+		std::cout << "Number of vertices: " << loadedModel.GetNumberOfVertices() << std::endl;
 		std::cout << "Number of texture coordinates: " << loadedModel.m_textureCoordinates.size() << std::endl;
 		std::cout << "Number of normals: " << loadedModel.m_normals.size() << std::endl;
-		std::cout << "Number of faces: " << numFaces << std::endl;
-		std::cout << "Number of vertices: " << loadedModel.GetNumberOfVertices() << std::endl;
+		std::cout << "Number of faces (triangles): " << numFaces << std::endl;
 		std::cout << "ModelLoader::LoadModelFromOBJFile - Model loaded complete." << std::endl << std::endl;
 
 		for (const auto& pair : loadedModel.m_mtlToFaces)

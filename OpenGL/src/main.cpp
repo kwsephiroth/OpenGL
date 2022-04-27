@@ -16,6 +16,9 @@
 #include <cstdlib>
 #include <stdlib.h>
 #include <thread>
+//#include <assimp/Importer.hpp>      // C++ importer interface
+//#include <assimp/scene.h>           // Output data structure
+//#include <assimp/postprocess.h>     // Post processing flags
 
 #define ASSERT(x) if (!(x)) __debugbreak();
 #define GLCall(x) GLClearError();\
@@ -89,6 +92,39 @@ static void print_mat4(const glm::mat4& m)
 	}
 }
 
+//static bool ImportModelUsingAssimp(const std::string& pFile) {
+//	// Create an instance of the Importer class
+//	Assimp::Importer importer;
+//
+//	// And have it read the given file with some example postprocessing
+//	// Usually - if speed is not the most important aspect for you - you'll
+//	// probably to request more postprocessing than we do in this example.
+//	const aiScene* scene = importer.ReadFile(pFile,
+//		aiProcess_CalcTangentSpace |
+//		aiProcess_Triangulate |
+//		aiProcess_JoinIdenticalVertices |
+//		aiProcess_SortByPType);
+//	std::cout << "Importing model '" << pFile << "' using Assimp library...\n";
+//	// If the import failed, report it
+//	if (nullptr == scene) {
+//		//DoTheErrorLogging(importer.GetErrorString());
+//		std::cout << importer.GetErrorString() << "\n";
+//		return false;
+//	}
+//
+//	// Now we can access the file's contents.
+//	//DoTheSceneProcessing(scene);
+//
+//	std::cout << "Filename : " << scene->GetShortFilename(pFile.c_str()) << "\nMaterials:\n"; 
+//	for (int i = 0; i < scene->mNumMaterials; ++i)
+//	{
+//		std::cout << "--Name: " <<  scene->mMaterials[i]->GetName().C_Str() << "\n";
+//	}
+//
+//	// We're done. Everything will be cleaned up by the importer destructor
+//	return true;
+//}
+
 int main(void)
 {
 	GLFWwindow* window;
@@ -102,7 +138,7 @@ int main(void)
 	//glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	/* Create a windowed mode window and its OpenGL context */
-	window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
+	window = glfwCreateWindow(1920, 1080, "Hello World", NULL, NULL);
 	if (!window)
 	{
 		glfwTerminate();
@@ -135,12 +171,15 @@ int main(void)
 		auto batModelPtr = ModelLoader::LoadModelFromOBJFile("bat", "res/models/bat.obj", "");
 		auto mangoTreeMtlMapPtr = MaterialLoader::LoadMaterialFromMtlFile("res/models/mango_tree.mtl");
 		auto mangoTreeModelPtr = ModelLoader::LoadModelFromOBJFile("mango_tree", "res/models/mango_tree.obj", "");
+		//ImportModelUsingAssimp("res/models/bat.glb");
 
 		if (!batModelPtr || !mangoTreeModelPtr)
 		{
+			std::cout << "ERROR: Failed to load one or more required models." << std::endl;
 			return -1;
 		}
 		
+		//TODO: Consolidate this work into one function in Renderer class.
 		renderer.AddModel(std::move(batModelPtr));
 		renderer.AddModel(std::move(mangoTreeModelPtr));
 		renderer.CopyFromMaterialsMap(std::move(batMtlMapPtr));
@@ -151,25 +190,31 @@ int main(void)
 	
 	glm::mat4 tempModelMatrix = glm::mat4(1.0f);//Initialize to identity matrix
 
-	float yRotAngle = 0.0f;
+	float yRotAngle = 180.0f;
 	float xRotAngle = 0.0f;
 
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 	
-	float speed = 120.0f;//frames per second
+	//float speed = 120.0f;//frames per second
+	float speed = 300.0f;
 	int fps = 0;
 	/* initialize random seed: */
 	//srand(time(NULL));
 	int random_number = (rand() % 100);
 	const int GROUND_LEVEL = -8.0f;
 
-	const int TREE_COUNT = 10000;
+	const int TREE_COUNT = 100;//If tree count is too high, it slows down the rendering. keep it low.
 	std::vector<int> tree_rands;
 	for (size_t i = 0; i < TREE_COUNT; ++i)
 	{
 		tree_rands.push_back((rand() % 100));
 	}
+
+	const auto cameraZ = 1.5f;
+	auto depthOffset = 0.0f;
+	bool depthChange = false;
+	bool rotationChange = false;
 
 	/* Loop until the user closes the window */
 	while (!glfwWindowShouldClose(window))
@@ -197,36 +242,46 @@ int main(void)
 
 		if (keys[GLFW_KEY_S]) //UP Movement
 		{
-			xRotAngle += (deltaTime * speed);
+			//xRotAngle += (deltaTime * speed);
+			depthOffset += (deltaTime * 5);
+			depthChange = true;
 		}
 
 		if (keys[GLFW_KEY_W])//DOWN/Crouch Movement
 		{
-			xRotAngle -= (deltaTime * speed);
+			//xRotAngle -= (deltaTime * speed);
+			depthOffset -= (deltaTime * 5);
+			depthChange = true;
 		}
 
 		if (keys[GLFW_KEY_D])//LEFT movement
 		{
 			yRotAngle += (deltaTime * speed);
+			rotationChange = true;
 		}
 
 		if (keys[GLFW_KEY_A])//RIGHT movement
 		{
 			yRotAngle -= (deltaTime * speed);
+			rotationChange = true;
 		}
 
 		//bat 1
+		//tempModelMatrix = glm::translate(tempModelMatrix, glm::vec3(-0.7f, 0.2f, depthOffset));
+		tempModelMatrix = glm::translate(tempModelMatrix, glm::vec3(-0.5f, 0.1f, depthOffset));
 		glm::vec3 euler_angles(glm::radians(xRotAngle), glm::radians(yRotAngle), 0);
 		//glm::vec3 euler_angles(0, (float)glfwGetTime() * speed, 0);
 		glm::quat my_quat = glm::quat(euler_angles);
 		//glm::quat my_quat2 = glm::angleAxis(glm::radians(xRotAngle), glm::vec3(1.0f, 0.0f, 0.0f));
 		//tempModelMatrix = glm::translate(tempModelMatrix, glm::vec3(-0.8f, -0.8f, 0.0f));	
-		tempModelMatrix = glm::toMat4(my_quat);
+		tempModelMatrix *= glm::toMat4(my_quat);
 		tempModelMatrix = glm::scale(tempModelMatrix, glm::vec3(.3f, .3f, .3f));
 		//tempModelMatrix = glm::rotate(tempModelMatrix, toRadians(xRotAngle), glm::vec3(1.0f, 0.0f, 0.0f));		
 		//tempModelMatrix = glm::rotate(tempModelMatrix, toRadians(yRotAngle), glm::vec3(0.0f, 1.0f, 0.0f));
 
-	
+		auto vMat = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, -(cameraZ + depthOffset)));
+		//vMat = glm::rotate(vMat, toRadians(yRotAngle), glm::vec3(0.0f, 1.0f, 0.0f));
+		renderer.SetViewMatrix(std::move(vMat));
 		renderer.SetModelMatrix("bat", std::move(tempModelMatrix));
 		renderer.RenderModel("bat");
 
@@ -267,6 +322,9 @@ int main(void)
 
 		//reset temp matrix to identity matrix per iteration
 		tempModelMatrix = glm::mat4(1.0f);
+
+		depthChange = false;
+		rotationChange = false;
 
 	}
 	tree_rands.clear();

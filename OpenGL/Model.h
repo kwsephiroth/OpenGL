@@ -89,7 +89,7 @@ public:
 
 	inline unsigned int GetTextureID() const { return m_textureID; }
 	inline bool IsInitialized() const { return m_initialized; }
-	inline unsigned int GetNumberOfVertices() const { return m_positionValues.size() / 3; }
+	inline unsigned int GetNumberOfVertices() const { return m_positions.size(); }
 	inline std::string GetName() const { return m_name; }
 	bool HasTexture() { return (!m_textureCoordinates.empty() ? true : false); }
 	bool HasNormals() { return (!m_normals.empty() ? true : false); }

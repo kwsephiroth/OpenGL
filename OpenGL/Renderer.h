@@ -52,6 +52,7 @@ public:
 	void SetShaderProgramId(unsigned int shaderProgramId) { m_shaderProgramId = shaderProgramId; }
 	void SetAspectRatio(float aspectRatio) { m_aspectRatio = aspectRatio; }
 	void SetModelMatrix(const std::string& modelName, glm::mat4&& modelMatrix);
+	void SetViewMatrix(glm::mat4&& viewMatrix);
 	void SetMaterialsMap(std::unique_ptr<MaterialsMap> mtlMapPtr) { m_materials = std::move(mtlMapPtr); }
 	void CopyFromMaterialsMap(std::unique_ptr<MaterialsMap> mtlMapPtr)
 	{
