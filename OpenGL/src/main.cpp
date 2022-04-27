@@ -279,8 +279,10 @@ int main(void)
 		//tempModelMatrix = glm::rotate(tempModelMatrix, toRadians(xRotAngle), glm::vec3(1.0f, 0.0f, 0.0f));		
 		//tempModelMatrix = glm::rotate(tempModelMatrix, toRadians(yRotAngle), glm::vec3(0.0f, 1.0f, 0.0f));
 
-		auto vMat = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, -(cameraZ + depthOffset)));
-		//vMat = glm::rotate(vMat, toRadians(yRotAngle), glm::vec3(0.0f, 1.0f, 0.0f));
+		auto vMat = glm::translate(glm::mat4(1.0f), glm::vec3(0.5f, -0.1f, -(cameraZ + depthOffset)));
+		//glm::vec3 euler_angles2(0, glm::radians(yRotAngle - 180.0f), 0);
+		//glm::quat my_quat2 = glm::quat(euler_angles2);
+		//vMat *= glm::toMat4(my_quat2);
 		renderer.SetViewMatrix(std::move(vMat));
 		renderer.SetModelMatrix("bat", std::move(tempModelMatrix));
 		renderer.RenderModel("bat");

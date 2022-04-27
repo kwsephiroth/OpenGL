@@ -72,6 +72,7 @@ private:
 	glm::mat4 m_modelMatrix;
 	glm::vec3 m_initialWorldPosition = { 0,0,0 };
 
+    std::unordered_map<std::string, VBOCollection> m_mtlToVBOs;
 	//TODO: Texture m_texture;
 
 	std::unordered_map<std::string, FaceCollection> m_mtlToFaces;
@@ -97,10 +98,12 @@ public:
 	void SetModelMatrix(glm::mat4&& modelMatrix) { m_modelMatrix = std::move(modelMatrix); }
 	const glm::mat4& GetModelMatrix() const { return m_modelMatrix; }
 	const glm::vec3& GetInitialWorldPosition() const { return m_initialWorldPosition; }
+	const std::unordered_map<std::string, VBOCollection>& GetMaterialToVBOMap() const { return m_mtlToVBOs; };
 	void ResetWorldPosition();
 	void ResetWorldPosition(glm::vec3 worldPosition);
 	
-	std::unordered_map<std::string, VBOCollection> m_mtlToVBOs; //temporarily public
+	
 
 	friend class ModelLoader;
+	friend class Renderer;
 };

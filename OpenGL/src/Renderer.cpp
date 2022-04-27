@@ -51,7 +51,7 @@ void Renderer::RenderModel(const std::string & modelName)
 			//float lightDiffuse[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
 			//float lightSpecular[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
 
-		for (const auto& pair : m->m_mtlToVBOs)
+		for (const auto& pair : m->GetMaterialToVBOMap())
 		{
 			//current material
 			const auto& currentMtl = m_materials->find(pair.first)->second;
