@@ -54,7 +54,7 @@ public:
 	void SetModelMatrix(const std::string& modelName, glm::mat4&& modelMatrix);
 	void SetViewMatrix(glm::mat4&& viewMatrix);
 	void SetMaterialsMap(std::unique_ptr<MaterialsMap> mtlMapPtr) { m_materials = std::move(mtlMapPtr); }
-	void CopyFromMaterialsMap(std::unique_ptr<MaterialsMap> mtlMapPtr)
+	void IntegrateIntoMaterialsMap(std::unique_ptr<MaterialsMap> mtlMapPtr)
 	{
 		for (auto itr = mtlMapPtr->begin(); itr != mtlMapPtr->end(); ++itr)
 		{

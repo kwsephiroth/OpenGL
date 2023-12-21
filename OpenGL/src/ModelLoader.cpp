@@ -478,9 +478,9 @@ std::unique_ptr<Model> ModelLoader::LoadModelFromOBJFile(const std::string& mode
 		std::cout << "Number of faces (triangles): " << numFaces << std::endl;
 		std::cout << "ModelLoader::LoadModelFromOBJFile - Model loaded complete." << std::endl << std::endl;
 
-		for (const auto& pair : loadedModel.m_mtlToFaces)
+		for (const auto& [material_name, face_collection] : loadedModel.m_mtlToFaces)
 		{
-			std::cout << "Material: " << pair.first << ", Number Of Faces: " << pair.second.m_positionValues.size() / 9 << std::endl;
+			std::cout << "Material: " << material_name << ", Number Of Faces: " << (face_collection.m_positionValues.size() / 9) << std::endl;
 		}
 		return loadedModelPtr;
 	}

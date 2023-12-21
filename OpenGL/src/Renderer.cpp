@@ -10,7 +10,7 @@ Renderer::Renderer(unsigned int shaderProgramId, unsigned int positionAttributeL
 	glGenVertexArrays(1, &m_vao);
 	
 	//Temps below
-	cameraX = 0.0f; cameraY = 0.0f; cameraZ = 1.5f;
+	cameraX = 0.0f; cameraY = 0.0f; cameraZ = 1.0f;
 	objLocX = 0.0f; objLocY = 0.0f; objLocZ = 0.0f;
 	aspect = (float)640 / (float)480;
 
@@ -24,9 +24,7 @@ Renderer::~Renderer()
 
 void Renderer::RenderModel(const std::string & modelName)
 {
-	auto itr = m_models.find(modelName);
-
-	if (itr != m_models.end())
+	if (auto itr = m_models.find(modelName); itr != m_models.end())
 	{
 		using namespace std;
 		auto& m = itr->second;
@@ -51,10 +49,14 @@ void Renderer::RenderModel(const std::string & modelName)
 			//float lightDiffuse[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
 			//float lightSpecular[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
 
+		//TODO: This rendering logic currently assumes there is a material associated with the object.
+		//However, it needs to handle the case where no material file(s) is specified.
 		for (const auto& pair : m->GetMaterialToVBOMap())
 		{
 			//current material
+			auto material_iter = m_materials->find(pair.first);
 			const auto& currentMtl = m_materials->find(pair.first)->second;
+
 			float ambientColor[4] = { currentMtl.GetAmbientColor().x, currentMtl.GetAmbientColor().y , currentMtl.GetAmbientColor().z , 1 };
 			float diffuseColor[4] = { currentMtl.GetDiffuseColor().x, currentMtl.GetDiffuseColor().y , currentMtl.GetDiffuseColor().z , 1 };
 			float specularColor[4] = { currentMtl.GetSpecularColor().x, currentMtl.GetSpecularColor().y , currentMtl.GetSpecularColor().z , 1 };

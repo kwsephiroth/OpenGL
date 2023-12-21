@@ -168,12 +168,14 @@ int main(void)
 		//Attempt to generate model object
 		//auto model = ModelLoader::LoadModelFromOBJFile("shuttle", "res/models/shuttle.obj", "res/textures/spstob_1.jpg");
 		auto batMtlMapPtr = MaterialLoader::LoadMaterialFromMtlFile("res/models/bat.mtl");
-		auto batModelPtr = ModelLoader::LoadModelFromOBJFile("bat", "res/models/bat.obj", "");
+		auto batModelPtr = ModelLoader::LoadModelFromOBJFile("bat", "res/models/bat.obj");
 		auto mangoTreeMtlMapPtr = MaterialLoader::LoadMaterialFromMtlFile("res/models/mango_tree.mtl");
-		auto mangoTreeModelPtr = ModelLoader::LoadModelFromOBJFile("mango_tree", "res/models/mango_tree.obj", "");
+		auto mangoTreeModelPtr = ModelLoader::LoadModelFromOBJFile("mango_tree", "res/models/mango_tree.obj");
+		//auto pineTreeModelPtr = ModelLoader::LoadModelFromOBJFile("pine_tree", "res/models/pine_tree.obj");
+		//auto pineTreeMtlMapPtr = MaterialLoader::LoadMaterialFromMtlFile("res/models/pine_tree.mtl");
 		//ImportModelUsingAssimp("res/models/bat.glb");
 
-		if (!batModelPtr || !mangoTreeModelPtr)
+		if (!batModelPtr || /*!pineTreeModelPtr)||*/ !mangoTreeModelPtr)
 		{
 			std::cout << "ERROR: Failed to load one or more required models." << std::endl;
 			return -1;
@@ -182,8 +184,10 @@ int main(void)
 		//TODO: Consolidate this work into one function in Renderer class.
 		renderer.AddModel(std::move(batModelPtr));
 		renderer.AddModel(std::move(mangoTreeModelPtr));
-		renderer.CopyFromMaterialsMap(std::move(batMtlMapPtr));
-		renderer.CopyFromMaterialsMap(std::move(mangoTreeMtlMapPtr));
+		//renderer.AddModel(std::move(pineTreeModelPtr));
+		renderer.IntegrateIntoMaterialsMap(std::move(batMtlMapPtr));
+		renderer.IntegrateIntoMaterialsMap(std::move(mangoTreeMtlMapPtr));
+		//renderer.CopyFromMaterialsMap(std::move(pineTreeMtlMapPtr));
 	}
 
     auto toRadians = [](float degrees) {return (degrees * 2.0f * 3.14159f) / 360.0f; };
@@ -204,14 +208,14 @@ int main(void)
 	int random_number = (rand() % 100);
 	const int GROUND_LEVEL = -8.0f;
 
-	const int TREE_COUNT = 100;//If tree count is too high, it slows down the rendering. keep it low.
+	const int TREE_COUNT = 50;//If tree count is too high, it slows down the rendering. keep it low.
 	std::vector<int> tree_rands;
 	for (size_t i = 0; i < TREE_COUNT; ++i)
 	{
-		tree_rands.push_back((rand() % 100));
+		tree_rands.push_back((rand() % 50));
 	}
 
-	const auto cameraZ = 1.5f;
+	const auto cameraZ = 1.0f;
 	auto depthOffset = 0.0f;
 	bool depthChange = false;
 	bool rotationChange = false;
@@ -269,7 +273,7 @@ int main(void)
 		//bat 1
 		//tempModelMatrix = glm::translate(tempModelMatrix, glm::vec3(-0.7f, 0.2f, depthOffset));
 		tempModelMatrix = glm::translate(tempModelMatrix, glm::vec3(-0.5f, 0.1f, depthOffset));
-		glm::vec3 euler_angles(glm::radians(xRotAngle), glm::radians(yRotAngle), 0);
+		glm::vec3 euler_angles(glm::radians(xRotAngle), glm::radians(-yRotAngle), 0);
 		//glm::vec3 euler_angles(0, (float)glfwGetTime() * speed, 0);
 		glm::quat my_quat = glm::quat(euler_angles);
 		//glm::quat my_quat2 = glm::angleAxis(glm::radians(xRotAngle), glm::vec3(1.0f, 0.0f, 0.0f));
@@ -280,6 +284,11 @@ int main(void)
 		//tempModelMatrix = glm::rotate(tempModelMatrix, toRadians(yRotAngle), glm::vec3(0.0f, 1.0f, 0.0f));
 
 		auto vMat = glm::translate(glm::mat4(1.0f), glm::vec3(0.5f, -0.1f, -(cameraZ + depthOffset)));
+		//vMat *= glm::rotate(vMat, glm::radians(yRotAngle), glm::vec3(0.0f, 1.0f, 0.0f));
+
+		//auto vMat = glm::rotate(glm::mat4(1.0f), toRadians(-yRotAngle), glm::vec3(0.0f, 1.0f, 0.0f));
+		//vMat *= glm::translate(glm::mat4(1.0f), glm::vec3(0.5f, -0.1f, -(cameraZ + depthOffset)));
+
 		//glm::vec3 euler_angles2(0, glm::radians(yRotAngle - 180.0f), 0);
 		//glm::quat my_quat2 = glm::quat(euler_angles2);
 		//vMat *= glm::toMat4(my_quat2);
@@ -302,14 +311,18 @@ int main(void)
 		//Mango tree
 		for (size_t i = 0; i < TREE_COUNT; ++i)
 		{
+			//TODO: Devise better algorithm to randomize tree location. Only render trees that are visible; cull others!
 			auto tf = tree_rands[i] + i;
 			tempModelMatrix = glm::mat4(1.0f);//Initialize to identity matrix
-			tempModelMatrix = glm::scale(tempModelMatrix, glm::vec3(.09f, .09f, .09f));
+			//tempModelMatrix = glm::scale(tempModelMatrix, glm::vec3(.09f, .09f, .09f));
+			tempModelMatrix = glm::scale(tempModelMatrix, glm::vec3(.15f, .15f, .15f));
 			tempModelMatrix = glm::translate(tempModelMatrix, glm::vec3(cos(tf) * tree_rands[i] * i/*15.0f*/, GROUND_LEVEL, sin(tf) * tree_rands[i] * i));//-5.0f));
 			tempModelMatrix = glm::rotate(tempModelMatrix, toRadians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
 			renderer.SetModelMatrix("mango_tree", std::move(tempModelMatrix));
 			renderer.RenderModel("mango_tree");
+			//renderer.SetModelMatrix("pine_tree", std::move(tempModelMatrix));
+			//renderer.RenderModel("pine_tree");
 		}
 
 		renderer.SetAspectRatio(aspect);
